@@ -1,0 +1,124 @@
+# The order in which things initialize is very important.
+# If these were initialized by mast running in separate files,
+# then the order they run in gets determined by the alphabetical
+# order of the mast file names. Which wouldn't be great.
+# So to control the initialization order, initialize everything here.
+# (There might be older code that doesn't initialize here,
+# but it probably should.)
+
+# game_state.py thing
+# set by sbs_utils whenever the engine's sim state changes
+default shared SIM_STATE = _sbs_utils_sim_state_uninitialized()
+
+# Ensure this only runs once
+if client_id == 0:
+    # task_schedule here is necessary to use awaits inside initialize_game.
+    # If an await happens here in the top-level code, then all
+    # other top-level code that's in files that come alphabetically
+    # after this one won't run until the await has completed.
+    task_schedule(initialize_game)
+
+# For some reason I don't understand, these must be called prior
+# to routing the clients' and server's entry points.
+# Otherwise, these reroutes seem to have no effect.
+route_change_console(gui_console_selection_routed_from_change_console_button)
+route_console_mainscreen_change(on_mainscreen_change)
+
+# Must use gui_reroute_client and gui_reroute_server (or something
+# that calls them, such as reroute()).
+# Do NOT call gui_reroute_clients!
+# Do NOT call task_schedule!
+if get_game_setup_data() is None:
+    reroute(client_id, temporary_gui_while_initializing)
+else:
+    reroute(client_id, reroute_to_entry_point)
+
+# Why not gui_reroute_clients:
+# gui_reroute_clients always and only affects currently-connected clients.
+# Note that code at the top level of mast files runs once on the server
+# when the mission script is started, runs once for each connected client
+# when the mission script is started, and runs once for a client when it
+# connects after the mission script is started.
+# Therefore, calling gui_reroute_clients at the top level of a mast file
+# (which is necessary for it to be triggered when a client connects)
+# would unnecessarily trigger all already-connected clients to be rerouted
+# to the specified label and possibly refresh their gui every time a new
+# client connects.
+# This is not only inefficient, but also requires the code in the labels
+# being routed to to handle the case where the client shouldn't change its
+# gui because the client has already readied up (or something), which
+# unnecessarily complicates things.
+# And If there are any upsides that would outweigh these downsides, then
+# I don't know of them.
+
+# Why not task_schedule:
+# For some reason I don't understand, using task_schedule instead of
+# gui_reroute_* causes the client_disconnect signal to never be recieved.
+
+==== temporary_gui_while_initializing ====
+    if not ensure_on_gui_task(temporary_gui_while_initializing):
+        ->END
+    
+    # As far as I know, it *might* be possible for the game setup data to
+    # have finished initializing between scheduling this task and it running
+    if get_game_setup_data() is not None:
+        jump reroute_to_entry_point
+    
+    if not is_skybox_animation_hack_enabled():
+        # get started loading the background png immediately, b/c it's somewhat slow
+        gui_section(style="area:0,0-100,400,200;")
+        gui_image(f"data/graphics/{_get_skybox_path()}", fit=2)
+    
+    gui_section(style="area:50-100px,50-20px,50+100px,50+20px;background:#0004;")
+    gui_text("Initializing...", style=f"font:gui-3;justify:center;")
+    
+    signal_register("initialize_game_setup_finished", reroute_to_entry_point)
+    
+    print(f"await gui_patched() ==== temporary_gui_while_initializing ====")
+    await gui_patched()
+
+==== reroute_to_entry_point ====
+    get_game_setup_data().add_client(client_id)
+    
+    if is_operator_mode_logo_on_server_enabled():
+        server_entry_point = gui_operator_mode_server_main
+    else:
+        server_entry_point = gui_game_setup_main
+    reroute(client_id, server_entry_point, gui_console_selection_main)
+    
+    ->END
+
+==== initialize_game ====
+    
+    initialize_vessel_types_data()
+    
+    initialize_game_statistics()
+    
+    # controller_game_setup_data.py
+    await task_schedule(initialize_game_setup_data)
+    # Have to register signals here, because signal listeners only listen
+    # for as long as the task that created them is running
+    signal_register("client_disconnect", _game_setup_data_on_client_disconnect)
+    signal_register(signal_before_player_ship_destroyed(), _game_setup_data_before_player_ship_destroyed)
+    signal_register(signal_after_player_ship_destroyed(), _game_setup_data_after_player_ship_destroyed)
+    signal_register(signal_game_set_up_for_new(), _game_setup_data_on_set_up_for_new)
+    
+    # background_skybox_hack.py
+    # This depends on game_state.
+    # However, game_state should initialize AFTER this.
+    # Otherwise, game_state emitting signal_game_setup_initialized
+    # couldn't be responded to by background_skybox_hack since
+    # it would never have had a chance to register a listener.
+    initialize_background_skybox_hack()
+    
+    # game_state.py
+    initialize_game_state()
+    # I couldn't find a way to do this with python
+    on change SIM_STATE:
+        _on_change_sbs_utils_sim_state(SIM_STATE)
+    
+    signal_emit("initialize_game_setup_finished")
+    
+    # Can't end this task, because then the registered signals
+    # and on-changes would stop listening.
+    yield idle

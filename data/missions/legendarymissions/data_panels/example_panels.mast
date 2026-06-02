@@ -2,23 +2,11 @@
 # This adds a new console to select 
 # a display panel
 
+set_is_console_ship_specific("display_panels", True)
+
 @console/display_panels !0 ^110 "Display panels" 
     " Display panels for of this ship
-
-
-    gui_section( style=f"area: 0, 45px, 100, 100;")
-
-# The section for buttons to pick a display panel
-# currently just the one
-
-#    with gui_sub_section("row-height:50px"):
-#        gui_button("Alert Condition",  on_press="alert_condition")
-
-    jump alert_condition
-
-    await gui()
-
-
+    
 #
 # The Alert condition panel
 #
@@ -26,10 +14,10 @@
 # Red, green, yellow or blue 
 #
 === alert_condition
-
-
---- repaint    
-
+    
+    if not prepare_console("display_panels", widget_list=""):
+        ->END
+    
     # this get the id of the ship this console is on
     ship_id = sbs.get_ship_of_client(client_id)
     # this get the red alert state of that ship
@@ -69,15 +57,15 @@
         ly = ry - 4
         lx = 5 + y * 2
         rx = 95 - y *2
-        gui_section( style=f"area: {lx}, {ly}, {rx}, {ry};background:{color}")
+        gui_section( style=f"area: {lx}, {ly}+18px, {rx}, {ry}+18px;background:{color}")
         ly = 60+ y*5 + 2
         ry = ly + 4
-        gui_section( style=f"area: {lx}, {ly}, {rx}, {ry};background:{color}")
+        gui_section( style=f"area: {lx}, {ly}+18px, {rx}, {ry}+18px;background:{color}")
         
 #
 # Add a section to draw the text  
 #
-    gui_section( style=f"area: 20, 40, 80, 60;")
+    gui_section( style=f"area: 20, 40+18px, 80, 60+18px;")
     gui_text(f"text:CONDITION;justify:center;font:gui-6;color:{color}")
     gui_row()
     gui_text(f"text:{color};justify:center;font:gui-6;color:{color}")
@@ -85,11 +73,12 @@
 # When a New GUI is presented later
 # This task will be ended automatically
 # gui sub task shares the data scope with the gui task
-    gui_sub_task_schedule("watch")
+    gui_sub_task_schedule("watch", data={"ship_id": ship_id, "prev_alert_state": prev_alert_state, "prev_shield_state": prev_shield_state, "prev_dock_state": prev_dock_state})
 # hide the options button
-    sbs.transparent_options_button(client_id,1)
+    sbs.transparent_options_button(client_id, 0)
 # Present the GUI
-    await gui()
+    print("await gui_patched() ==== alert_condition ====")
+    await gui_patched()
 
 #
 # The watch sub label will watch
@@ -105,8 +94,6 @@
 
 # If anything changed its time to refresh
     if alert_state != prev_alert_state or shield_state != prev_shield_state or dock_state != prev_dock_state:
-# Since this is a GUI change, it needs to call gui_task_jump to
-# redirect the gui        
-        gui_task_jump("repaint")
+        gui_switch_to("alert_condition")
     jump watch
 

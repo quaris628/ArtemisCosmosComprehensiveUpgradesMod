@@ -1,5 +1,7 @@
 import ../../common/library_function_patches.py
 
+#import ../game_setup/console_code_helpers.py
+
 import gamemaster.mast
 import gamemaster_controls.py
 import gamemaster_info_panel.py

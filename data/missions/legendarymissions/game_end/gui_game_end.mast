@@ -1,0 +1,167 @@
+
+signal_register(signal_game_ended(), "gui_game_end_on_game_ended")
+
+# TODO jump into gui_game_end_main from whatever controls the console tabs
+# (Making sure not to jump clients that aren't in the game, i.e. still on console select screen)
+==== gui_game_end_on_game_ended ====
+    print(f"gui_game_end_on_game_ended client_id={client_id}")
+    
+    GAME_SETUP_DATA = get_game_setup_data()
+    GAME_STATISTICS = get_game_statistics()
+    
+    if client_id == 0 and is_quasi_headless_server_mode_enabled():
+        ->END
+    
+    if GAME_STATISTICS.is_end_success():
+        sbs.play_music_file(client_id, get_full_music_file_path("victory"))
+    else:
+        sbs.play_music_file(client_id, get_full_music_file_path("failure"))
+    
+    if GAME_SETUP_DATA.is_client_ready(client_id) or client_id == 0:
+        # On the server, top tabs were disabled before showing mainscreen console
+        enable_gui_top_tabs(client_id)
+        
+        # If ending from the pause menu, the delay workaround seems necessary
+        # to avoid a mast-level crash:
+        # https://github.com/artemis-sbs/LegendaryMissions/issues/634
+        # If ending from all ships dying, the delay workaround seems necessary
+        # to avoid a hard server crash.
+        # TODO diagnose this hard server crash and report it ^
+        # If ending from the gamemaster command, all friendly bases being destroyed,
+        # all enemies being destroyed, time running out, or a neutral zone violation,
+        # then this delay workaround seems unnecessary, but it also doesn't seem to
+        # cause any harm.
+        # I haven't tested ending from peacetime's ambassador being killed.
+        gui_switch_to(gui_game_end_main, delay_reroute_workaround=True)
+    
+    ->END
+
+==== gui_game_end_main ====
+    
+    if not ensure_on_gui_task(gui_game_end_main):
+        ->END
+    
+    create_skybox_background_on_client(client_id)
+    
+    GAME_STATISTICS = get_game_statistics()
+    GAME_SETUP_DATA = get_game_setup_data()
+    
+    # ----- titles -----
+    
+    gui_section(style=f"area:12px,12px,100-12px,132px;background:{color_background()};")
+    gui_row(style="row-height:60px;")
+    gui_text("GAME RESULTS", style=f"font:gui-6;justify:left;col-width:575px;padding:8px,18px;color:{color_text()};")
+    gui_text(f"LEVEL {GAME_SETUP_DATA.difficulty} {GAME_SETUP_DATA.get_map_display_name()}", style=f"font:gui-5;padding:0,0,8px,0;justify:right;color:pink;")
+    
+    gui_row(style="row-height:80px;")
+    gui_text(f"Game ended because {GAME_STATISTICS.get_reason_for_end()}", style=f"font:gui-3;justify:left;padding:8px,0;color:cyan;")
+    
+    # TODO have tabs, to show more info such as remaining ordinance and energy
+    
+    # ----- left body -----
+    
+    gui_section(style=f"area:0+12px,144px,45-6px,100-64px;background:{color_background()};")
+    
+    remaining_enemies = GAME_STATISTICS.get_remaining_enemies()
+    if 0 < remaining_enemies:
+        create_label_value_pair("Enemies Remaining", str(remaining_enemies), "yellow")
+    if 0 < GAME_STATISTICS.get_destroyed_count():
+        gui_row(style="row-height:32px;padding:8px,4px,8px,0;")
+        # $text is necessary in order to display a colon
+        # https://github.com/artemis-sbs/LegendaryMissions/issues/566#issuecomment-4291760757
+        gui_text("$text:Vessels Destroyed:;", style="font:gui-3;justify:right;color:yellow;")
+        ~~
+        for origin, destroyed_count in GAME_STATISTICS.get_origin_destroyed_counts_iterable():
+            if 0 < destroyed_count:
+                create_label_value_pair(origin.capitalize(), str(destroyed_count), "yellow")
+        ~~
+    
+    # ----- right body -----
+    
+    gui_section(style=f"area:45+6px,144px,100-12px,100-64px;background:{color_background()};")
+    
+    create_label_value_pair("Player Ships Lost", str(GAME_STATISTICS.get_player_ships_destroyed_count()), "lime")
+    create_label_value_pair("Player Single-seat Craft Lost", str(GAME_STATISTICS.get_friendly_single_seat_destroyed_count()), "lime")
+    create_label_value_pair("Friendly Stations Lost", str(GAME_STATISTICS.get_friendly_stations_destroyed_count()), "lime")
+    # TODO don't hardcode/assume tsn is equivalent to friendly
+    create_label_value_pair("Friendly Ships Lost", str(GAME_STATISTICS.get_origin_destroyed_count("tsn")), "lime")
+    create_label_value_pair("Surrendered Ships Killed", str(GAME_STATISTICS.get_surrendered_killed_count()), "lime")
+    
+    # Artemis 2.8 also displays a count of space monsters tagged,
+    # but 1) tags aren't implemented in Cosmos yet,
+    # 2) space monsters aren't fully fleshed out in Cosmos yet, and
+    # 3) this count just doesn't seem very important to me anyway,
+    # so I figure it's not worth implementing (probably ever).
+    
+    create_label_value_pair("Ships Surrendered", str(GAME_STATISTICS.get_surrendered_count()), "yellow")
+    create_label_value_pair("Player Beams Fired", str(GAME_STATISTICS.get_player_beams_fired_count()), "yellow")
+    # TODO count player ordinance firing, once mast hook for the engine event gets implemented
+    # https://github.com/artemis-sbs/LegendaryMissions/issues/385
+    #create_label_value_pair("Player Ordinance Fired", str(GAME_STATISTICS.get_player_ordinance_fired_count()), "yellow")
+    
+    create_label_value_pair("Successful Dock Attempts", str(GAME_STATISTICS.get_player_successful_docks_count()))
+    create_label_value_pair("Anomalies Collected", str(GAME_STATISTICS.get_player_picked_up_anomaly_count()))
+    # TODO count mines detonated
+    # I don't think it's possible to detect whether damage was from a mine
+    # from code triggered by //damage/object but maybe this will change
+    # if this inconsistent damage parent id bug ever gets fixed.
+    # https://github.com/artemis-sbs/LegendaryMissions/issues/495
+    #create_label_value_pair("Mine Detonations", "?")
+    create_label_value_pair("Mission Duration (minutes)", str(GAME_STATISTICS.get_duration_in_minutes()))
+    
+    # ----- bottom text and buttons -----
+    
+    SETTINGS = settings_get_defaults()
+    is_new_game_wo_script_restart_enabled = SETTINGS.get("ENABLE_NEW_GAME_WO_SCRIPT_RESTART", False)
+    # TODO this should be 'server OR operator admin client OR (enable_new_game_wo_script_restart AND not locked out from changing my console)'
+    make_bottom_right_button = client_id == 0 or is_client_verified_operator_admin() or is_new_game_wo_script_restart_enabled
+    
+    x_right = "70-20px" if make_bottom_right_button else "100-10px"
+    gui_section(style=f"area:10px,100-56px,{x_right},100-10px;background:{color_background()};")
+    gui_text("Thanks for playing!\nFind the latest news and version at artemisspaceshipbridge.com", style=f"font:gui-2;padding:5px,0;color:{color_text()};")
+    
+    if make_bottom_right_button:
+        gui_section(style="area:70-10px,100-55px,100-10px,100-10px")
+        # Use separate button and text label to work around not
+        # being able to "justify:center;" a button's built-in label
+        bottom_right_button = gui_button("", style=f"font:gui-3;color:{color_text()}")
+        gui_section(style="area:70-10px,100-55px,100-10px,100-10px")
+        if client_id == 0 or is_client_verified_operator_admin():
+            gui_text("New Game", style=f"font:gui-3;justify:center;color:{color_text()};")
+            if is_new_game_wo_script_restart_enabled:
+                on gui_message(bottom_right_button):
+                    set_up_new_game()
+                    gui_switch_to(gui_game_setup_main)
+            else:
+                on gui_message(bottom_right_button):
+                    # TODO: clear guis and show message that the game is restarting (like a loading screen)
+                    sbs.run_next_mission(get_mission_name())
+        else: # is_new_game_wo_script_restart_enabled == True
+            gui_text("Change Console", style=f"font:gui-3;justify:center;color:{color_text()};")
+            on gui_message(bottom_right_button):
+                # TODO add a "back to game results" button to console selection
+                # And make game state "game ended" jump straight to in-progress when
+                # starting a second or subsequent game, so the game status can be
+                # used to determine whether this button should be enabled.
+                gui_switch_to(gui_console_selection_main)
+    
+    # ----- responding to events -----
+    
+    signal_register(signal_game_started(), gui_game_end_on_game_started, is_temporary=True)
+    
+    print(f"await gui_patched() ==== gui_game_end_main ====")
+    await gui_patched()
+
+ ==== gui_game_end_on_game_started ====
+    GAME_SETUP_DATA = get_game_setup_data()
+    # Client will not be ready in the event that the player ship count is decreased
+    # lower than the client's previous ship number
+    if not GAME_SETUP_DATA.is_client_ready(client_id):
+        # TODO maybe notify the player at the time this client becomes not ready
+        # due to their selected ship being changed
+        gui_switch_to(gui_console_selection_main)
+        ->END
+    
+    jump_into_game()
+    
+    ->END

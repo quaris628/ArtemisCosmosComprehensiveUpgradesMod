@@ -1,3 +1,8 @@
+import ../../common/library_function_patches.py
+
+# import ../game_setup/console_code_helpers.py
+# import ../game_setup/controller_game_setup_data.py
+
 import document_screen.mast
 import document_screen.py
 

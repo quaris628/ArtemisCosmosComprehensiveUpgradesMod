@@ -1,0 +1,60 @@
+
+==== gui_operator_mode_admin_client_login ====
+    
+    if is_client_verified_operator_admin():
+        gui_switch_to(gui_operator_mode_admin_client_main)
+        ->END
+    
+    if not ensure_on_gui_task(gui_operator_mode_admin_client_login):
+        ->END
+    
+    #gui_section(style="area:10px,46px,30+10px,91px;")
+    gui_section(style="area:0,36px,200px,72px;")
+    # Use separate button and text label to work around not
+    # being able to "justify:center;" a button's built-in label
+    back_button = gui_button("")
+    gui_section(style="area:0,36px,200px,72px;")
+    gui_text("Back", style=f"font:gui-3;justify:center;color:{color_text()};")
+    
+    gui_section(style="area:50-240px,50-32px,50+240px,50+32px;")
+    gui_row()
+    # $text is necessary in order to display a colon
+    # https://github.com/artemis-sbs/LegendaryMissions/issues/566#issuecomment-4291760757
+    gui_text("$text:Admin PIN:;", style=f"font:gui-3;justify:right;padding:0,5px,10px,0;color:{color_text()};")
+    password_input = gui_input("$text:;password:True;", style=f"font:gui-3;color:{color_text()};")
+    gui_row()
+    gui_blank()
+    # Show "Accepted" to make it clear the password was correct
+    # in the unlikely event that there's an error preventing the
+    # screen from switching away. For example, currently the
+    # gamemaster console won't open while the game is paused:
+    # https://github.com/artemis-sbs/LegendaryMissions/issues/638
+    accepted_text = gui_text("", style=f"font:gui-3;color:#0f0;")
+    
+    on gui_message(back_button):
+        gui_switch_to(gui_console_selection_main)
+    
+    on gui_message(password_input):
+        if password_input.value == get_operator_mode_pin():
+            set_client_verified_operator_admin()
+            accepted_text.value = "Accepted"
+            gui_represent_patched(accepted_text)
+            gui_switch_to(gui_operator_mode_admin_client_main)
+    
+    await gui_patched()
+
+==== gui_operator_mode_admin_client_main ====
+    
+    GAME_SETUP_DATA = get_game_setup_data()
+    
+    GAME_SETUP_DATA.deselect_all_consoles(client_id)
+    selected_ship = GAME_SETUP_DATA.get_selected_ship(client_id)
+    selected_ship.deselect_all_consoles(client_id)
+    
+    # TODO more accessible pause/unpause (especially unpause) buttons in gamemaster console
+    
+    if is_game_in_progress():
+        gui_switch_to(gui_game_setup_on_game_started)
+    else:
+        gui_switch_to(gui_game_setup_main)
+    ->END

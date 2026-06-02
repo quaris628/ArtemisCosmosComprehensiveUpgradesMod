@@ -1,0 +1,356 @@
+
+# These variables are used by the gui controls specified in each map file.
+# Their values are affected by users editing those map-specific gui controls.
+# They have to be synced with equivalent fields in game setup data.
+#
+# (It would probably be ideal to have only one source of truth for these
+# settings, instead of multiple copies that have to be synced.
+# But keep using these variables at least for now, for backwards compatibility
+# with how the map code specifies its settings.)
+default shared PLAYER_COUNT = None
+default shared DIFFICULTY = None
+default shared TERRAIN_SELECT = None
+default shared LETHAL_SELECT = None
+default shared FRIENDLY_SELECT = None
+default shared MONSTER_SELECT = None
+default shared UPGRADE_SELECT = None
+default shared GAME_TIME_LIMIT = None
+default shared WAR_TIME_DELAY = None
+
+==== gui_game_setup_main ====
+    
+    if not ensure_on_gui_task(gui_game_setup_main):
+        ->END
+    
+    # Do NOT assume that this will only run on the server!
+    # It might be shown on a client if operator mode is enabled.
+    
+    # This should never happen, but just in case
+    game_state = get_game_state()
+    if game_state == game_state_paused() or game_state == game_state_running():
+        jump gui_game_setup_on_game_started
+    
+    default shared SETTINGS = settings_get_defaults()
+    # TODO test AUTO_START setting
+    if SETTINGS.get("AUTO_START", False):
+        start_game()
+        jump gui_game_setup_on_game_started
+    
+    GAME_SETUP_DATA = get_game_setup_data()
+    
+    jump gui_game_setup_scenario_tab
+
+==== gui_game_setup_scenario_tab ====
+    
+    create_skybox_background_on_client(client_id)
+    gui_game_setup_create_top_tabs(gui_top_tab_scenario_key())
+    
+    # ----- Mission Script Name + Description -----
+    
+    mission_overview = maps_get_init()
+    if mission_overview is not None:
+        mission_display_text = "$t {mission_overview.display_name}\n\n{mission_overview.desc} Select a mission type below, then select start mission."
+    else:
+        mission_display_text = "$t Mission Selection\n\nSelect a mission type below, then select start mission."
+    gui_section(style=f"area:10px,88px,100-10px,30-5px;margin:0,0,10px,0;padding:10px,0;background:{color_background()};")
+    gui_text_area(mission_display_text)
+    
+    # ----- Map Control -----
+    # siege, single front, double front, peacetime, etc.
+    
+    map_objects_dict = {map_obj.path: map_obj for map_obj in maps_get_list()}
+    selected_map_object = map_objects_dict[GAME_SETUP_DATA.map_identifier]
+    
+    gui_section(style="area:10px,30+5px,50-5px,100-65px;")
+    map_listbox = gui_list_box(list(map_objects_dict.values()), f"row-height:7em;background:{color_background()};", item_template=map_listbox_template, title_template=map_listbox_title_template, select=True, carousel=True)
+    
+    map_listbox.value = selected_map_object
+    # Work around https://github.com/artemis-sbs/LegendaryMissions/issues/428
+    map_listbox.set_selected_index(map_listbox.get_selected_index())
+    
+    # ----- Map Options Control -----
+    # difficulty, terrain, etc.
+    
+    # See comment at the top of this file, next to these variables' definitions
+    shared PLAYER_COUNT = GAME_SETUP_DATA.player_ship_count
+    shared DIFFICULTY = GAME_SETUP_DATA.difficulty
+    shared TERRAIN_SELECT = GAME_SETUP_DATA.environment_settings.terrain_freq.as_string()
+    shared LETHAL_SELECT = GAME_SETUP_DATA.environment_settings.lethal_terrain_freq.as_string()
+    shared FRIENDLY_SELECT = GAME_SETUP_DATA.environment_settings.friendly_ships_freq.as_string()
+    shared MONSTER_SELECT = GAME_SETUP_DATA.environment_settings.monsters_freq.as_string()
+    shared UPGRADE_SELECT = GAME_SETUP_DATA.environment_settings.upgrades_freq.as_string()
+    shared GAME_TIME_LIMIT = str(GAME_SETUP_DATA.environment_settings.time_limit_in_minutes)
+    shared WAR_TIME_DELAY = str(GAME_SETUP_DATA.environment_settings.war_time_delay_in_minutes)
+    # Do not move these on-change blocks prior to the first gui element's creation
+    # https://github.com/artemis-sbs/LegendaryMissions/issues/589
+    on change PLAYER_COUNT:
+        GAME_SETUP_DATA.player_ship_count = PLAYER_COUNT
+    on change DIFFICULTY:
+        GAME_SETUP_DATA.difficulty = DIFFICULTY
+    on change TERRAIN_SELECT:
+        GAME_SETUP_DATA.environment_settings.terrain_freq = env_freq_from_string(TERRAIN_SELECT)
+    on change LETHAL_SELECT:
+        GAME_SETUP_DATA.environment_settings.lethal_terrain_freq = env_freq_from_string(LETHAL_SELECT)
+    on change FRIENDLY_SELECT:
+        GAME_SETUP_DATA.environment_settings.friendly_ships_freq = env_freq_from_string(FRIENDLY_SELECT)
+    on change MONSTER_SELECT:
+        GAME_SETUP_DATA.environment_settings.monsters_freq = env_freq_from_string(MONSTER_SELECT)
+    on change UPGRADE_SELECT:
+        GAME_SETUP_DATA.environment_settings.upgrades_freq = env_freq_from_string(UPGRADE_SELECT)
+    on change GAME_TIME_LIMIT:
+        GAME_SETUP_DATA.environment_settings.time_limit_in_minutes = int(GAME_TIME_LIMIT) if GAME_TIME_LIMIT.isdecimal() else 0
+    on change WAR_TIME_DELAY:
+        GAME_SETUP_DATA.environment_settings.war_time_delay_in_minutes = int(WAR_TIME_DELAY) if WAR_TIME_DELAY.isdecimal() else 0
+    
+    gui_section(style=f"area:50+5px,30+5px,100-41px,100-65px;background:{color_background()};")
+    map_options_listbox = gui_property_list_box(name="Options")
+    map_properties = get_map_properties_with_demo_check(selected_map_object)
+    
+    gui_properties_set_patched(map_options_listbox, map_properties)
+    
+    on change map_listbox.value:
+        GAME_SETUP_DATA.map_identifier = map_listbox.value.path
+        
+        gui_properties_set_patched(map_options_listbox, get_map_properties_with_demo_check(map_listbox.value))
+        gui_represent_patched(map_options_listbox)
+        # Currently, there are no map options with the same variable name
+        # but different meanings or different ranges of valid values.
+        # If that ever changes, then said map options may need to have
+        # their values reset here, both on the gui and in GAME_SETUP_DATA.
+    
+    
+    jump gui_game_setup_create_common_gui_elements
+
+==== gui_game_setup_player_ships_tab ====
+    
+    create_skybox_background_on_client(client_id)
+    gui_game_setup_create_top_tabs(gui_top_tab_player_ships_key())
+    
+    GAME_SETUP_DATA = get_game_setup_data()
+    VESSEL_TYPES_DATA = get_vessel_types_data()
+    
+    # ----- misc controls along the top -----
+    
+    # player ships count slider
+    gui_section(style=f"area:10px,80px,400px,115px;background:{color_background()};")
+    # $text is necessary in order to display a colon
+    # https://github.com/artemis-sbs/LegendaryMissions/issues/566#issuecomment-4291760757
+    gui_text("$text:Count:;", style=f"font:gui-3;col-width:100px;padding:5px,4px;color:{color_text_secondary()};")
+    create_player_ship_count_control()
+    
+    # ----- main table stuff -----
+    
+    ship_number_col_width = "26px"
+    ship_name_col_width = "250px"
+    ship_type_col_width = "546px"
+    details_col_width = "160px"
+    
+    gui_section(style=f"area:10px,120px,100-10px,100-65px;")
+    
+    # ----- column labels -----
+    
+    gui_row(style=f"row-height:36px;")
+    gui_blank(style=f"col-width:{ship_number_col_width};")
+    gui_blank(style="col-width:5px;")
+    
+    # ship name
+    with gui_sub_section(style=f"col-width:{ship_name_col_width};background:{color_background()};"):
+        gui_text("Name", style=f"font:gui-3;padding:4px,4px;color:{color_text_secondary()};")
+    gui_blank(style="col-width:10px;")
+    
+    # ship type
+    with gui_sub_section(style=f"col-width:{ship_type_col_width};background:{color_background()};"):
+        gui_text("Class", style=f"font:gui-3;padding:4px,4px;color:{color_text_secondary()};")
+    
+    # ----- table cells -----
+    
+    for ship_number in range(1, GAME_SETUP_DATA.get_max_player_ship_count() + 1):
+        ship = GAME_SETUP_DATA.get_player_ship_by_number(ship_number)
+        ship_type = VESSEL_TYPES_DATA.get_ship_type_from_key(ship.ship_type_key)
+        
+        gui_row(style="row-height:70px;")
+        
+        # ship number
+        with gui_sub_section(style=f"col-width:{ship_number_col_width};"):
+            number_text = gui_text(str(ship_number), style=f"font:gui-3;col-width:{ship_number_col_width};padding:4px,1px;color:{color_text()};")
+        gui_blank(style="col-width:5px;")
+        
+        # ship name
+        with gui_sub_section(style=f"col-width:{ship_name_col_width};"):
+            gui_row(style="row-height:29px;")
+            create_ship_name_input(ship)
+        gui_blank(style="col-width:10px;")
+        
+        # ship type
+        with gui_sub_section(style=f"col-width:{ship_type_col_width};"):
+            gui_row(style="row-height:29px;")
+            create_player_ship_type_controls(ship)
+            gui_row(style=f"row-height:24px;")
+            with gui_sub_section(style=f"col-width:{ship_type_col_width};"):
+                create_player_ship_type_short_description_text(ship, style=f"font:gui-1;padding:4px,2px;color:{color_text()};background:{color_background()};")
+        gui_blank(style="col-width:10px;")
+        
+        # go to detailed customization button
+        with gui_sub_section(style=f"col-width:{details_col_width};"):
+            gui_row(style="row-height:29px;")
+            details_button = gui_button("Open Detailed View", style=f"font:gui-2;padding:5px,0;color:{color_text_secondary()};", data={"SHIP_NUMBER": ship.number})
+            on gui_message(details_button):
+                GAME_SETUP_DATA = get_game_setup_data()
+                ship = GAME_SETUP_DATA.get_player_ship_by_number(SHIP_NUMBER)
+                gui_switch_to_customize_ship(ship, back_label=gui_game_setup_player_ships_tab)
+        
+        _set_player_ship_misc_gui_elements(ship.number, number_text, details_button)
+    
+    signal_register(signal_game_setup_data_player_ship_availability_changed(), _gui_game_setup_player_ships_tab_on_availability_changed, is_temporary=True)
+    task_schedule(_gui_game_setup_player_ships_tab_update_after_delay)
+    
+    jump gui_game_setup_create_common_gui_elements
+
+==== gui_game_setup_connections_tab ====
+    
+    create_skybox_background_on_client(client_id)
+    gui_game_setup_create_top_tabs(gui_top_tab_connections_key())
+    
+    gui_section(style="area:0,88px,100,100-65px;")
+    gui_text("Placeholder for client connections viewing and editing", style="justify:center;")
+    
+    jump gui_game_setup_create_common_gui_elements
+
+==== gui_game_setup_create_common_gui_elements ====
+    
+    # ----- Restart Buttons -----
+    
+    current_mission_name = get_mission_name()
+    gui_section(style="area:10px,100-55px,30+10px,100-10px")
+    # Use separate button and text label to work around not
+    # being able to "justify:center;" a button's built-in label
+    restart_mission_button = gui_button("")
+    gui_section(style="area:10px,100-55px,30+10px,100-10px")
+    gui_text(f"Reboot {current_mission_name}", style=f"font:gui-2;justify:center;color:{color_text_secondary()};")
+    gui_row()
+    gui_text("(Loses your changes to settings)", style=f"font:gui-2;justify:center;color:{color_text_secondary()};")
+    
+    on gui_message(restart_mission_button):
+        # TODO: clear guis and show message that the game is restarting (like a loading screen)
+        # And share this code between this restart button and the one on the game setup screen
+        # (in gui_pause_menu.py)
+        sbs.run_next_mission(current_mission_name)
+    
+    startup_mission_name = get_startup_mission_name()
+    if startup_mission_name is not None and len(startup_mission_name) > 0 and current_mission_name != startup_mission_name:
+        gui_section(style="area:35,100-55px,65,100-10px")
+        # Use separate button and text label to work around not
+        # being able to "justify:center;" a button's built-in label
+        restart_mission_button = gui_button("")
+        gui_section(style="area:30+20px,100-55px,70-20px,100-10px")
+        gui_text(f"Back to {startup_mission_name}", style=f"font:gui-2;justify:center;color:{color_text_secondary()};")
+        gui_row()
+        gui_text("(Loses your changes to settings)", style=f"font:gui-2;justify:center;color:{color_text_secondary()};")
+        
+        on gui_message(restart_mission_button):
+            # TODO: clear guis and show message that the game is restarting (like a loading screen)
+            # And share this code between this restart button and the one on the game setup screen
+            # (in gui_pause_menu.py)
+            sbs.run_next_mission(startup_mission_name)
+    
+    # ----- Start Button -----
+    
+    gui_section(style="area:70-10px,100-55px,100-10px,100-10px")
+    # Use separate button and text label to work around not
+    # being able to "justify:center;" a button's built-in label
+    start_mission_button = gui_button("")
+    gui_section(style="area:70-10px,100-55px,100-10px,100-10px")
+    gui_text("Start", style=f"font:gui-3;justify:center;color:{color_text()};")
+    
+    on gui_message(start_mission_button):
+        start_game()
+    
+    signal_register(signal_game_started(), gui_game_setup_on_game_started, is_temporary=True)
+    
+    await gui_patched()
+
+==== gui_game_setup_on_game_started ====
+    
+    if not ensure_on_gui_task(gui_game_setup_on_game_started):
+        ->END
+    
+    GAME_SETUP_DATA = get_game_setup_data()
+    SETTINGS = settings_get_defaults()
+    
+    GAME_SETUP_DATA.add_client(client_id, ship_number=1)
+    
+    if is_client_verified_operator_admin():
+        if not GAME_SETUP_DATA.try_select_console(client_id, get_operator_mode_console_after_game_starts(), fall_back_to_ship_specific=True):
+            if not GAME_SETUP_DATA.try_select_console(client_id, "gamemaster"):
+                gui_switch_to(gui_console_selection_main)
+                ->END
+    else: # client_id == 0
+        create_pause_menu(client_id)
+        # GAME_STATE really shouldn't be referenced directly,
+        # but this was the only way I could find to make listening
+        # to the game state changes from the pause menu gui code work.
+        # TODO: dig deeper, i.e. see why better methods weren't working
+        on change GAME_STATE:
+            task_schedule(_pause_menu_on_game_state_changed)
+        
+        # Necessary to ensure the gui does not get redrawn,
+        # which would remove the above pause menu stuff.
+        # TODO allow server to switch consoles (without losing access to
+        # the critical pause menu)
+        disable_gui_top_tabs(client_id)
+        
+        # Do this after creating any gui element (such as the pause menu),
+        # just in case this issue also affects signal_register(..., is_temporary=True)
+        # https://github.com/artemis-sbs/LegendaryMissions/issues/589
+        signal_register(signal_before_player_ship_destroyed(), gui_game_setup_reassign_ship_before_player_ship_destroyed, is_temporary=True)
+        
+        selected_ship = GAME_SETUP_DATA.get_selected_ship(client_id)
+        # this *should* always succeed
+        selected_ship.try_select_console(client_id, "mainscreen")
+    
+    # this *should* always succeed
+    GAME_SETUP_DATA.try_client_ready(client_id)
+    
+    jump_into_game()
+    ->END
+
+==== gui_game_setup_reassign_ship_before_player_ship_destroyed ====
+    GAME_SETUP_DATA = get_game_setup_data()
+    old_selected_ship = GAME_SETUP_DATA.get_selected_ship(client_id)
+    if old_selected_ship is None:
+        ->END
+    if DESTROYING_PLAYER_SHIP_ID != old_selected_ship.spawned_ship_id:
+        ->END
+    
+    # Find the next not-destroyed player ship (if one exists)
+    new_ship_number = None
+    for ship_number in itertools.chain(range(old_selected_ship.number + 1, GAME_SETUP_DATA.player_ship_count + 1), range(1, old_selected_ship.number)):
+        player_ship_setup_data = GAME_SETUP_DATA.get_player_ship_by_number(ship_number)
+        player_ship_object = to_space_object(player_ship_setup_data.spawned_ship_id)
+        if player_ship_object is not None and not has_role(player_ship_setup_data.spawned_ship_id, "exploded"):
+            new_ship_number = ship_number
+            break
+    if new_ship_number is None:
+        # Game should be ending b/c all player ships were destroyed,
+        # therefore the screen should switch to the game results screen
+        # TODO maybe explicitly add a limbo screen
+        ->END
+    
+    # Switch to the new ship
+    old_console_slots = old_selected_ship.get_console_slots_selected_by_client(client_id)
+    GAME_SETUP_DATA.switch_ship(client_id, new_ship_number)
+    new_selected_ship = GAME_SETUP_DATA.get_player_ship_by_number(new_ship_number)
+    # Currently, there should only be one slot selected at a time,
+    # but copy them all over in case multiple console tabs are enabled
+    # for the server in-game screen at some point.
+    for console_slot in old_console_slots:
+        new_selected_ship.try_select_console(client_id, console_slot.identifier)
+    if not GAME_SETUP_DATA.is_at_least_one_console_selected_by_client(client_id, include_ship_specific=True):
+        new_selected_ship.try_select_console(client_id, "mainscreen")
+    GAME_SETUP_DATA.try_client_ready(client_id)
+    
+    sbs.assign_client_to_ship(client_id, new_selected_ship.spawned_ship_id)
+    unlink(DESTROYING_PLAYER_SHIP_ID, "consoles", client_id)
+    link(new_selected_ship.spawned_ship_id, "consoles", client_id)
+    
+    ->END

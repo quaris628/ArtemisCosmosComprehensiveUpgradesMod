@@ -1,4 +1,6 @@
 
+set_is_console_ship_specific("hangar", False)
+
 shared hangar_version = 1
 shared call_signs = hangar_get_call_signs()
 shared next_call_sign = 0
@@ -7,7 +9,7 @@ shared next_call_sign = 0
 #  Background task to look for strays
 #
 shared find_stray = task_schedule(find_stray_crafts)
-default HANGAR_CONSOLE_ENABLED = True
+
 # Just make sure the data loads
 hangar_get_craft_data("terran")
 #
@@ -66,11 +68,12 @@ hangar_get_craft_data("terran")
 
 
 
-@console/hangar !0 ^50 "Flight Hangar" if HANGAR_CONSOLE_ENABLED
+@console/hangar !0 ^50 "Flight Hangar"
     " Fly fighter- shuttle and cargo missions
-    jump show_hangar # This could be replaced with a new command gui_navigate("//console/hangar")
-
+    
 === show_hangar ==
+    if not prepare_console("hangar"):
+        ->END
     
     # This is need for black hole, need to clear any ship assigned
     _original =  sbs.get_ship_of_client(client_id)
@@ -147,7 +150,7 @@ hangar_get_craft_data("terran")
     
     gui_tab_back(CONSOLE_SELECT)
 
-    gui_section(style="area: 41+1em,0, 100,100-50px;")
+    gui_section(style="area:41+1em,36px,100,100-50px;")
     gui_layout_widget("2dview")
 
     fighter_change = 0
@@ -219,7 +222,7 @@ hangar_get_craft_data("terran")
 
     # If a thing launches or docks things need to refresh
     on change hangar_version:
-        jump show_hangar
+        gui_switch_to(show_hangar)
 
     gui_section(style="area: 0,100-150px, 35,100;")
     gui_layout_widget("text_waterfall")
@@ -241,14 +244,15 @@ hangar_get_craft_data("terran")
             unlink(old_ship_id, "consoles", client_id)
             ride_select = ride_choice
             link(ride_select , "consoles", client_id)
-            jump launch_to_cockpit
-        jump show_hangar
+            gui_switch_to(launch_to_cockpit)
+        else:
+            gui_switch_to(show_hangar)
 
 
 
     #dock_picker.set_selected_index(0)
     
-    await gui()
+    await gui_patched()
     #    + "Head to Bar":
     #        print("Bar")
     #        jump bar_enter
@@ -260,18 +264,23 @@ hangar_get_craft_data("terran")
     #        #jump show_hangar
 
 
-    jump show_hangar
-
-    
-
 ==== launch_to_cockpit ======
+    
+    if not ensure_on_gui_task(launch_to_cockpit):
+        ->END
+    
+    if ride_select is None:
+        gui_switch_to(show_hangar)
+        ->END
+    if not has_role(ride_select, "standby"):
+        gui_switch_to(show_hangar)
+        ->END
 
-    jump show_hangar if ride_select is None
-    jump show_hangar if not has_role(ride_select, "standby")
-
-    jump show_hangar if not hangar_launch_craft(to_id(ride_select), client_id)
-
-    sbs.assign_client_to_ship(client_id,to_id(ride_select))
+    if not hangar_launch_craft(to_id(ride_select), client_id):
+        gui_switch_to(show_hangar)
+        ->END
+    
+    sbs.assign_client_to_ship(client_id, to_id(ride_select))
     set_inventory_value(ride_select, "client_id", client_id)
     set_dedicated_link(client_id, "craft_id", ride_select)
     sbs.send_grid_selection_info(ride_select.id, "", "white", "")
@@ -282,14 +291,15 @@ hangar_get_craft_data("terran")
         hangar_objective_started(ride_select, home_id, mission_objective)
 
     gui_console("cockpit")
+    #gui_console("mainscreen")
+    
     # Buttons
     gui_section(style="area:0,0,50px,100;orientation:BT;")
     gui_row(style="row-height:50px;")
     brain = gui_button("icon_index:134;color:#fff", on_press="hangar_grid_select", data={"sel_role":"computer"}, is_sub_task=True)
     
-
-
-    await gui()
+    print(f"await gui_patched() ==== launch_to_cockpit ====")
+    await gui_patched()
 
 --- hangar_grid_select
     _ship_id = sbs.get_ship_of_client(client_id)
@@ -344,7 +354,7 @@ hangar_get_craft_data("terran")
 
         if fighter_client is not None:
             set_dedicated_link(fighter_client, "craft_id", None)    
-            gui_reroute_client(fighter_client, show_hangar)
+            gui_switch_to("show_hangar", fighter_client)
 
         
 

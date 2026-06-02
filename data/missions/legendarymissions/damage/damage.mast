@@ -143,3 +143,9 @@
             pickup_spawn(wr_posx, wr_posy, wr_posz, "haplix_overcharger")
 
     ->END
+
+//damage/object if has_role(DAMAGE_SOURCE_ID, "__player__") and (DAMAGE_PARENT_ID is None or DAMAGE_PARENT_ID == 0)
+    # Presume this is beam damage, since ordinance damage (should) always
+    # have a damage parent specified.
+    GAME_STATISTICS = get_game_statistics()
+    GAME_STATISTICS.record_player_fired_beam(DAMAGE_SOURCE_ID)

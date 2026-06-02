@@ -1,0 +1,84 @@
+
+default shared SETTINGS = settings_get_defaults()
+default shared PLAYER_SHIP_RESPAWN = SETTINGS.get("PLAYER_SHIP_RESPAWN", False)
+
+default shared WATCH_FOR_GAME_END_TIME_LIMIT_TASK = None
+
+signal_register(signal_game_started(), watch_for_game_end_on_game_started, server=True)
+signal_register(signal_game_ended(), watch_for_game_end_on_game_ended, server=True)
+signal_register("npc_surrendered", watch_for_game_end_on_enemy_surrender, server=True)
+signal_register(signal_after_player_ship_destroyed(), watch_for_game_end_after_player_ship_destroyed, server=True)
+
+# setup/cleanup on game start and end
+
+==== watch_for_game_end_on_game_started ====
+    if is_timer_set(SHARED, "time_limit"):
+        WATCH_FOR_GAME_END_TIME_LIMIT_TASK = task_schedule(watch_for_game_end_check_timer)
+    else:
+        WATCH_FOR_GAME_END_TIME_LIMIT_TASK = None
+    ->END
+
+==== watch_for_game_end_on_game_ended ====
+    reset_game_end_conditions()
+    if WATCH_FOR_GAME_END_TIME_LIMIT_TASK is not None:
+        task_cancel(WATCH_FOR_GAME_END_TIME_LIMIT_TASK)
+    ->END
+
+# timer
+
+==== watch_for_game_end_check_timer ====
+    GAME_STATISTICS = get_game_statistics()
+    for ignored_var while not is_timer_finished(SHARED, "time_limit") and is_game_in_progress():
+        await delay_sim(get_time_remaining(SHARED, "time_limit"))
+    if is_game_in_progress():
+        GAME_STATISTICS.record_game_end(reason="time has run out.", is_success=False)
+        end_game()
+    ->END
+
+# no ally stations
+
+//damage/destroy if is_end_if_no_ally_stations_enabled() and has_roles(DESTROYED_ID, "tsn,station")
+    GAME_STATISTICS = get_game_statistics()
+    tsn_station_ids = all_roles("tsn,station")
+    tsn_station_ids.discard(DESTROYED_ID)
+    if len(tsn_station_ids) == 0:
+        GAME_STATISTICS.record_game_end(reason="all your base are belong to us.", is_success=False)
+        end_game()
+    ->END
+
+# no enemies
+
+//damage/destroy if is_end_if_no_enemies_enabled() and is_enemy(DESTROYED_ID)
+    enemy_ids = get_all_enemy_ids(except_enemy_id=DESTROYED_ID)
+    if len(enemy_ids) == 0:
+        jump watch_for_game_end_end_bc_no_enemies
+    ->END
+
+==== watch_for_game_end_on_enemy_surrender ====
+    if is_end_if_no_enemies_enabled() and is_enemy(SURRENDERED_SHIP_ID):
+        enemy_ids = get_all_enemy_ids(except_enemy_id=SURRENDERED_SHIP_ID)
+        if len(enemy_ids) == 0:
+            jump watch_for_game_end_end_bc_no_enemies
+    ->END
+
+==== watch_for_game_end_end_bc_no_enemies ====
+    GAME_STATISTICS = get_game_statistics()
+    GAME_STATISTICS.record_game_end(reason="all enemies have been defeated.", is_success=True)
+    end_game()
+    ->END
+
+# no players
+
+#//shared/signal/player_ship_destroyed if not PLAYER_SHIP_RESPAWN
+==== watch_for_game_end_after_player_ship_destroyed ====
+    # Ships with the "exploded" role have met the criteria to be deleted, but
+    # have not yet been deleted. They should be considered effectively destroyed.
+    if len(role("__player__") - role("exploded")) == 0:
+        GAME_STATISTICS = get_game_statistics()
+        GAME_STATISTICS.record_game_end(reason="all player ships have been destroyed.", is_success=False)
+        end_game()
+    ->END
+
+# There are also special game end triggers in the peacetime and in border war maps
+# You can find these triggers in their respective .mast files in legendarymissions/maps/
+# Custom missions may also add special game-end conditions

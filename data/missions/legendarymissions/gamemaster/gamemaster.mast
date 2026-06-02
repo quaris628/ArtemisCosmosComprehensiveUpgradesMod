@@ -14,31 +14,35 @@ default shared GAMEMASTER_CONSOLE_PIN = GAMEMASTER_CONSOLE.get("pin", None)
 default shared GAMEMASTER_CONSOLE_BETA = GAMEMASTER_CONSOLE.get("beta", False)
 default shared GAMEMASTER_CONSOLE_ICON_SIZE = GAMEMASTER_CONSOLE.get("menu_icon_size", 45)
 
-@console/gamemaster !0 ^100 "Game Master" if GAMEMASTER_CONSOLE_ENABLED
+set_is_console_ship_specific("gamemaster", False)
+
+@console/gamemaster !0 ^100 "Game Master" if GAMEMASTER_CONSOLE_ENABLED or is_operator_mode_enabled()
 " Affect the overall battle
-
-    # This is a bit of a work around s the operator doesn't need the pin twice
-    default GAMEMASTER_SKIP_PIN = False
-
-    jump full_console if GAMEMASTER_SKIP_PIN
-    jump full_console if GAMEMASTER_CONSOLE_PIN is None or GAMEMASTER_CONSOLE_PIN == ""
+    
+    if GAMEMASTER_CONSOLE_PIN is None or GAMEMASTER_CONSOLE_PIN == "" or is_client_verified_operator_admin():
+        jump route_console_gamemaster_full_console
 
 --- login_screen
+
+    if not prepare_console("gamemaster", widget_list=""):
+        ->END
+    
     gui_section( style=f"area: 20, 40, 80, 40+40px;")
     pin = ""
     """Gamemaster pin"""
     _in = gui_input("""desc: Enter pin;password:True;""", var="pin")
     on gui_message(_in):
-        jump full_console if pin == GAMEMASTER_CONSOLE_PIN
-
-    await gui():
-        + "cancel":
-            jump select_console
-
-
-    jump login_screen
+        if pin == GAMEMASTER_CONSOLE_PIN:
+            gui_switch_to(route_console_gamemaster_full_console)
+    
+    await gui_patched()
 
 --- full_console
+==== route_console_gamemaster_full_console ====
+    
+    if not prepare_console("gamemaster", rerun_label=route_console_gamemaster_full_console, widget_list=""):
+        ->END
+    
     # for testing Side management screen
     # side = "tsn"
     # jump gamemaster_side_relations# {"side": "tsn"}
@@ -49,7 +53,7 @@ default shared GAMEMASTER_CONSOLE_ICON_SIZE = GAMEMASTER_CONSOLE.get("menu_icon_
     gui_activate_console("gamemaster_sci")
 
     on signal side_management:
-        jump gamemaster_side_relations
+        gui_switch_to(route_console_gamemaster_gamemaster_side_relations)
 
     _ship_id = sbs.get_ship_of_client(client_id) 
     side_ship = to_object(_ship_id)
@@ -108,9 +112,9 @@ default shared GAMEMASTER_CONSOLE_ICON_SIZE = GAMEMASTER_CONSOLE.get("menu_icon_
     #comms_navigate("//comms/gamemaster")
     # Whole screen
     # Putting the 2d view across the entire screen
-    gui_section(style="area:0,0,100,100;")
+    gui_section(style="area:0,45px,100,100;")
     gui_layout_widget("science_2d_view")
-    gui_section(style="area:50-200px,0,50+200px,50px;")
+    gui_section(style="area:50-200px,45px,50+200px,95px;")
     gui_layout_widget("radar_zoom_ctrl")
 
     # Whole screen
@@ -371,11 +375,15 @@ default shared GAMEMASTER_CONSOLE_ICON_SIZE = GAMEMASTER_CONSOLE.get("menu_icon_
 
 
     task_schedule(update_gm_stats)
-    await gui()
-
+    await gui_patched()
 
 
 --- gamemaster_side_relations
+==== route_console_gamemaster_gamemaster_side_relations ====
+    
+    if not ensure_on_gui_task(route_console_gamemaster_gamemaster_side_relations):
+        ->END
+    
     # print("Getting mast labels")
     # labels = role("__MAST_LABEL__") #should get all mast labels
     # for l in labels:
@@ -419,7 +427,7 @@ default shared GAMEMASTER_CONSOLE_ICON_SIZE = GAMEMASTER_CONSOLE.get("menu_icon_
                 prefab_spawn(prefab_side_generic, data={"name":new_side.value, "key":new_side.value.lower()})
                 print(side_keys_set())
                 side = new_side.value
-                jump gamemaster_side_relations
+                gui_switch_to(route_console_gamemaster_gamemaster_side_relations)
     gui_row("col-width: 1.5em;")
     gui_text("  ")
     # gui_row()
@@ -465,7 +473,7 @@ default shared GAMEMASTER_CONSOLE_ICON_SIZE = GAMEMASTER_CONSOLE.get("menu_icon_
             if get_inventory_value(side, "side_desc") != side_desc.value:
                 set_inventory_value(side, "side_desc", side_desc.value)
             side = side_display_name(side)
-            jump gamemaster_side_relations
+            gui_switch_to(route_console_gamemaster_gamemaster_side_relations)
     #endregion
     region = gui_region("area: 25,20,90,90; ")
     #region Build the Relations Central Section
@@ -499,14 +507,15 @@ default shared GAMEMASTER_CONSOLE_ICON_SIZE = GAMEMASTER_CONSOLE.get("menu_icon_
     set_inventory_value(client_id, "gm_side_relations_button_list", buttons)
     on change selected_side.value:
         side = selected_side.value
-        jump gamemaster_side_relations
+        gui_switch_to(route_console_gamemaster_gamemaster_side_relations)
     # Add back button
     with gui_section("area: 90,95,100,100"):
         back = gui_button("Back")
         on gui_message(back):
             print("Back buttom pressed")
-            jump full_console
-    await gui()
+            gui_switch_to(route_console_gamemaster_full_console)
+    print(f"await gui_patched() @console/gamemaster --- gamemaster_side_relations")
+    await gui_patched()
     ->END
 --- update_side
     # __ITEM__ is the button object
@@ -519,7 +528,8 @@ default shared GAMEMASTER_CONSOLE_ICON_SIZE = GAMEMASTER_CONSOLE.get("menu_icon_
     side_set_relations(side1,side2,rel)
     rel = side_get_relations(side1,side2)
     print(f"{rel}")
-    jump gamemaster_side_relations
+    gui_switch_to(route_console_gamemaster_gamemaster_side_relations)
+    ->END
 
 
 == gm_build_spawn_menu

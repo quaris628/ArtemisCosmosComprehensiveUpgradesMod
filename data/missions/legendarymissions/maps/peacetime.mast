@@ -14,12 +14,12 @@ Properties:
     Player Ships: 'gui_int_slider("$text:int;low: 1.0;high:8.0;", var= "PLAYER_COUNT")'
     Difficulty: 'gui_int_slider("$text:int;low: 1.0;high:11.0;", var= "DIFFICULTY")'
   Map:
-    Terrain: 'gui_drop_down("$text: {TERRAIN_SELECT};list: none, few, some, lots, max",var="TERRAIN_SELECT")'
-    Lethal Terrain: 'gui_drop_down("$text: {LETHAL_SELECT};list: none, few, some, lots, max", var="LETHAL_SELECT")'
-    Friendly Ships: 'gui_drop_down("$text: {FRIENDLY_SELECT};list: none, few, some, lots, max", var="FRIENDLY_SELECT")'
-    Monsters: 'gui_drop_down("$text: {MONSTER_SELECT};list: none, few, some, lots, max", var="MONSTER_SELECT")'
-    Upgrades: 'gui_drop_down("$text: {UPGRADE_SELECT};list: none, few, some, lots, max", var= "UPGRADE_SELECT")'
-    Time Limit: 'gui_input("desc: Minutes;", var="GAME_TIME_LIMIT", listbox_container=map_options_listbox)'
+    Terrain: 'gui_drop_down("$text: {TERRAIN_SELECT};list: none, few, some, lots, max;color:#eee;",var="TERRAIN_SELECT")'
+    Lethal Terrain: 'gui_drop_down("$text: {LETHAL_SELECT};list: none, few, some, lots, max;color:#eee;", var="LETHAL_SELECT")'
+    Friendly Ships: 'gui_drop_down("$text: {FRIENDLY_SELECT};list: none, few, some, lots, max;color:#eee;", var="FRIENDLY_SELECT")'
+    Monsters: 'gui_drop_down("$text: {MONSTER_SELECT};list: none, few, some, lots, max;color:#eee;", var="MONSTER_SELECT")'
+    Upgrades: 'gui_drop_down("$text: {UPGRADE_SELECT};list: none, few, some, lots, max;color:#eee;", var= "UPGRADE_SELECT")'
+    Time Limit: 'gui_input("desc: Minutes;color:#eee;", var="GAME_TIME_LIMIT", listbox_container=map_options_listbox)'
 ```
 
     terrain_value = terrain_to_value(TERRAIN_SELECT)
@@ -458,7 +458,7 @@ Properties:
     task_schedule(scanning_cargo_containers)
     task_schedule(check_ambassador_rescued)
     task_schedule(kidnap_message)
-    task_schedule(task_peacetime_end_game)
+    set_game_end_conditions(end_if_no_enemies=False, end_if_no_ally_stations=False)
 
     #-----------------------------------------------------------------------------------------------------------------------------
     # Comms Section - Adds comms buttons for talking to stations. Some buttons only work if the player is docked with the station.
@@ -997,4 +997,6 @@ yield success
 
 //damage/destroy if has_role(DESTROYED_ID, "kidnapper") and not has_role(DESTROYED_ID, "standby")
     if kidnap_status < 3:
-        jump peacetime_ambassador_killed
+        GAME_STATISTICS = get_game_statistics()
+        GAME_STATISTICS.record_game_end(reason="the ship carrying Ambassador Florbin was destroyed.", is_success=False)
+        end_game()

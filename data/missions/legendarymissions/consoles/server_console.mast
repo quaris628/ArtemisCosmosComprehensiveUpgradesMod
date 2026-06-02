@@ -21,9 +21,8 @@ Select a mission type below then select start mission.
 # when the client is started
 #
 route_console_mainscreen_change(show_main_game_screen)
-gui_reroute_server("start_server")
-gui_reroute_clients("client_main")
-
+#gui_reroute_server("start_server")
+#gui_reroute_clients("client_main")
 
 #
 # The Server GUI
@@ -76,7 +75,7 @@ gui_reroute_clients("client_main")
     # Create all the player ships
     # 
 
-    if PLAYER_CREATE_DEFAULT:
+    if False:#PLAYER_CREATE_DEFAULT:
         for player_ship_data in PLAYER_LIST:
             player_ship = to_id(player_spawn(0,0,0, player_ship_data["name"], player_ship_data["side"], player_ship_data["ship"]))
             player_ship_data["id"] = player_ship
@@ -107,6 +106,18 @@ gui_reroute_clients("client_main")
 #
 ====== show_server_menu =====
     #
+    # Ensure the sim keeps running
+    #sim_resume()
+    default shared SIM_STATE = "sim_unknown"
+    
+    on change SIM_STATE:
+        print(SIM_STATE)
+        if SIM_STATE == "sim_paused":
+            on gui_message(gui_button("Resume")):
+                sim_resume()
+                jump show_server_menu
+            await gui()
+        
     jump start if AUTO_START
 
     #
@@ -198,7 +209,7 @@ Main:
 
 
     # Temp set this when first running
-    shared SIM_STATE = "sim_unknown"
+    default shared SIM_STATE = "sim_unknown"
 
     PLAYER_LIST = sorted(to_object_list(role("__player__")), key=lambda p: p.id)
     if len(PLAYER_LIST)>0:

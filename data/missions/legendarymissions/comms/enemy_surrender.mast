@@ -123,14 +123,18 @@ shared _surrender_return = task_schedule(take_surrendered_home)
     name = player.name
     comms_receive(f"""OK we give up, {name}.""", title_color=surrender_color)
     add_role(COMMS_SELECTED_ID, "surrendered")
-    surrender = game_stats.get("ships_surrender", 0 )
-    surrender += 1
-    game_stats["ships_surrender"] = surrender
+    GAME_STATISTICS = get_game_statistics()
+    GAME_STATISTICS.record_vessel_surrendered(COMMS_SELECTED)
+    
+    # Emit this prior to removing the raider role, so that listeners can
+    # distinguish raiders surrendering from other vessels surrendering.
+    # (The latter does not exist in the game currently, but might in the future.)
+    signal_emit("npc_surrendered", data={"SURRENDERED_SHIP_ID": COMMS_SELECTED_ID, "REQUESTED_BY_PLAYER_SHIP_ID": COMMS_ORIGIN_ID})
+    
     remove_role(COMMS_SELECTED_ID, "raider")
     set_data_set_value(COMMS_SELECTED_ID, "surrender_flag", 1)
     fleet_remove_ship(COMMS_SELECTED_ID)
-
-
+    
     yield SUCCESS
 
 

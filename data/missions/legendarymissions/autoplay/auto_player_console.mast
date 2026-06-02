@@ -3,6 +3,8 @@
 #
 settings_add_defaults({"AUTO_PLAY": {"enable": False}})
 
+# TODO update to work with new game start and end signals, possibly etc
+
 //signal/show_game_results if SETTINGS["AUTO_PLAY"]["enable"]
     await delay_app(2)
     mission = get_mission_name()

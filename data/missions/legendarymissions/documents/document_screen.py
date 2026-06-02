@@ -1,6 +1,7 @@
 from sbs_utils.procedural.gui import gui_row, gui_text, gui_icon
 from sbs_utils.procedural.quest import QuestState, document_get_amd_file 
 
+from sbs_utils.procedural.execution import get_variable, set_variable
 from sbs_utils.procedural.gui.listbox import gui_list_box_is_header
 from sbs_utils.helpers import FrameContext
 from sbs_utils.procedural.inventory import set_inventory_value
@@ -76,3 +77,12 @@ def quest_create_test_data():
     return doc
 
 
+# ----- setter/getter wrappers -----
+
+def _get_document_back_button_label():
+    return get_variable(_DOCUMENT_BACK_BUTTON_LABEL_VAR_NAME)
+
+def set_document_back_button_label(back_label):
+    set_variable(_DOCUMENT_BACK_BUTTON_LABEL_VAR_NAME, back_label)
+
+_DOCUMENT_BACK_BUTTON_LABEL_VAR_NAME = "_document_back_button_label"

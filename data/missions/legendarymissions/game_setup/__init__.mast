@@ -1,0 +1,69 @@
+import ../../common/library_function_patches.py
+
+import ../../common/model_vessel_type.py
+import ../../common/model_single_seat_craft_type.py
+import ../../common/model_player_capital_ship_type.py
+import ../../common/model_vessel_types_data.py
+import ../../common/controller_vessel_types_data.py
+
+import ../../common/model_game_statistics.py
+import ../../common/controller_game_statistics.py
+
+import ../../common/gui_color_scheme.py
+import ../../common/gui_top_tabs.py
+import ../../common/operator_mode.py
+
+import ../documents/document_screen.py
+
+# data
+
+import model_console_slot.py
+import model_console_slots_container.py
+import model_player_ship_setup_data.py
+import model_environment_setup_data.py
+import model_game_setup_data.py
+
+# misc shared/helper stuff
+
+import controller_game_setup_data.py
+import game_state.py
+import gui_help_button.py
+import gui_library_button.py
+import jump_into_game.py
+import console_code_helpers.py
+
+# reusable gui components
+
+import background_skybox_hack.py
+
+import gui_pause_menu.py
+
+import gui_player_ship_count_control.py
+import gui_player_ship_name_input.py
+import gui_player_ship_type_controls.py
+import gui_player_ship_type_short_description_text.py
+
+# main gui
+
+import gui_game_setup.py
+import gui_game_setup.mast
+
+import gui_customize_ship_3d_ship_display.py
+import gui_customize_ship_specifications_text.py
+import gui_customize_ship.py
+import gui_customize_ship.mast
+
+import gui_console_selection_top_text_ribbon.py
+import gui_console_selection_ship_checkbox.py
+import gui_console_selection_console_checkbox.py
+import gui_console_selection_ready_control.py
+import gui_console_selection_customize_ship_button.py
+import gui_console_selection_height_calculations.py
+import gui_console_selection.mast
+
+import gui_operator_mode_server.mast
+import gui_operator_mode_admin_client.mast
+
+# init
+
+import initialize.mast

@@ -1,0 +1,57 @@
+
+==== gui_operator_mode_server_main ====
+    
+    if not ensure_on_gui_task(gui_operator_mode_server_main):
+        ->END
+    
+    if is_quasi_headless_server_mode_enabled():
+        
+        gui_section(style="area:50-100px,50-20px,50+100px,50+20px;")
+        resume_button = gui_button("Resume")
+        
+        on gui_message(resume_button):
+            if get_game_state() == game_state_paused():
+                resume_game()
+        
+        # GAME_STATE really shouldn't be referenced directly,
+        # but this was the only way I could find to make listening
+        # to the game state changes from the pause menu gui code work.
+        # TODO: dig deeper, i.e. see why better methods weren't working
+        on change GAME_STATE:
+            if get_game_state() == game_state_paused():
+                gui_show(resume_button)
+            else:
+                gui_hide(resume_button)
+            gui_represent_patched(resume_button)
+        
+        task_schedule(gui_operator_mode_server_quasi_headless_update_after_delay, data={"RESUME_BUTTON": resume_button})
+        
+        await gui_patched()
+    
+    create_skybox_background_on_client(client_id)
+    
+    gui_section(style=f"area:0,42px,100,100-180px;")
+    gui_image(get_operator_mode_logo_filepath(), fit=3)
+    
+    gui_section(style=f"area:100-780px,100-180px,100-10px,100-10px;background:{color_background()};")
+    with gui_sub_section(style=f"col-width:410px;"):
+        gui_row(style="row-height:70px;")
+        gui_text("BUY THIS GAME", style=f"font:gui-6;justify:center;color:{color_text()};")
+        gui_row(style="row-height:30px;")
+        gui_text("artemisspaceshipbridge.com", style=f"font:gui-3;justify:center;color:{color_text()};")
+    gui_blank(style="col-width:10px;")
+    with gui_sub_section(style="col-width:170px;"):
+        gui_image("data/graphics/CosmosLogo", fit=3)
+    gui_blank(style="col-width:10px;")
+    with gui_sub_section(style="col-width:170px;"):
+        gui_image(get_mission_dir_filename("media/LegendaryMissions/artemis_home_page"), fit=3)
+    
+    signal_register(signal_game_started(), gui_game_setup_on_game_started, is_temporary=True)
+    
+    await gui_patched()
+
+==== gui_operator_mode_server_quasi_headless_update_after_delay ====
+    await delay_app(0)
+    gui_hide(RESUME_BUTTON)
+    gui_represent_patched(RESUME_BUTTON)
+    ->END

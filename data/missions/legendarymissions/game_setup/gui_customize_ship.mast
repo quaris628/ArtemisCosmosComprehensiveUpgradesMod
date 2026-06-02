@@ -1,0 +1,70 @@
+
+==== gui_customize_player_ship_main ====
+    if not ensure_on_gui_task(gui_customize_player_ship_main):
+        ->END
+    
+    GAME_SETUP_DATA = get_game_setup_data()
+    VESSEL_TYPES_DATA = get_vessel_types_data()
+    ship = _get_customize_ship_ship()
+    ship_type = VESSEL_TYPES_DATA.get_ship_type_from_key(ship.ship_type_key)
+    
+    create_skybox_background_on_client(client_id)
+    
+    create_3d_ship_display(ship, "0", "0", "100-420px", "100-160px")
+    
+    # Might need to mess around with this if there are very long names
+    # for origins or ship types
+    editing_controls_x_right = "590px"
+    
+    gui_section(style=f"area:0,100-215px,98px,100-183px;")
+    gui_text(f"Ship {ship.number}", style=f"font:gui-3;padding:13px,0;color:{color_text_secondary()};background:{color_background()};")
+    
+    gui_section(style=f"area:0,100-183px,595px,100;background:{color_background()};")
+    gui_blank()
+    
+    gui_section(style=f"area:10px,100-178px,{editing_controls_x_right},100-148px;")
+    gui_text("Name", style=f"font:gui-3;col-width:85px;padding:3px,2px;color:{color_text_secondary()};")
+    create_ship_name_input(ship)
+    
+    gui_section(style=f"area:10px,100-140px,{editing_controls_x_right},100-106px;")
+    gui_text("Class", style=f"font:gui-3;col-width:85px;padding:3px,3px;color:{color_text_secondary()};")
+    
+    create_player_ship_type_controls(ship, use_large_next_prev_buttons=True, next_prev_x_left="95px", next_prev_y_top="100-96px", next_prev_x_right=editing_controls_x_right)
+    
+    create_ship_type_specifications_text(ship, "100-420px", "0", "100", "100")
+    
+    # Don't bother displaying the ship type description, because
+    # 1) Most of the descriptions' information is now redundant
+    #    with the new specifications display
+    # 2) A lot of descriptions have colons (:), which means they won't show
+    #    https://github.com/artemis-sbs/LegendaryMissions/issues/566
+    # 3) There's not a lot of screen space left
+    
+    # Back button
+    gui_section(style="area:10px,100-55px,30+10px,100-10px;")
+    back_button = gui_button("")
+    # Use a separate text element for the label, so that it can be centered
+    gui_section(style="area:10px,100-55px,30+10px,100-10px;")
+    gui_text("Back", style=f"font:gui-3;justify:center;color:{color_text()};")
+    
+    on gui_message(back_button):
+        gui_switch_to(_get_customize_ship_back_label())
+    
+    signal_register(signal_game_started(), gui_customize_player_ship_on_game_started, is_temporary=True)
+    
+    signal_register(signal_game_setup_data_player_ship_availability_changed(ship.number), gui_customize_player_ship_on_player_ship_availability_changed, is_temporary=True)
+    
+    # TODO allow viewing, but not editing, after game has started
+    
+    print(f"await gui_patched() ==== gui_customize_player_ship_main ====")
+    await gui_patched()
+
+==== gui_customize_player_ship_on_game_started ====
+    gui_switch_to(_get_customize_ship_back_label())
+    ->END
+
+==== gui_customize_player_ship_on_player_ship_availability_changed ====
+    if IS_AVAILABLE:
+        ->END
+    gui_switch_to(_get_customize_ship_back_label())
+    ->END

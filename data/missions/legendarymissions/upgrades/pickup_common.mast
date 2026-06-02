@@ -114,5 +114,8 @@
         tpos = tobj.pos
         sbs.delete_object(COLLISION_ORIGIN_ID)
         sbs.particle_at(tpos, "color:#01F,#505; lifespan:30; image_cell:9; size:20;speed: 1; count:100,1000")
-
+    
+    GAME_STATISTICS = get_game_statistics()
+    GAME_STATISTICS.record_player_picked_up_anomaly(COLLISION_SELECTED_ID)
+    
     ->END

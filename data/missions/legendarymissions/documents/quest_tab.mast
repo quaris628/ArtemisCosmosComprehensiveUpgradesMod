@@ -21,5 +21,6 @@ if is_dev_build():
     document_back_tab = CONSOLE_SELECT
 
 
-    jump document_screen
+    gui_switch_to("document_screen")
+    ->END
 

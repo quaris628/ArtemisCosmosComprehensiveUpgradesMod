@@ -3,6 +3,7 @@
 # or any other objects.
 
 import ../../common/library_function_patches.py
+import ../../common/controller_game_statistics.py
 
 import ../consoles/layout_widgets.py
 

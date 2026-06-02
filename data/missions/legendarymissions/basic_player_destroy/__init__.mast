@@ -1,1 +1,5 @@
+import ../../common/common_signals.py
+
+#import ../game_setup/game_state.py
+
 import basic_player_destroy.mast

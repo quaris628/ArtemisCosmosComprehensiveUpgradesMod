@@ -1,1 +1,3 @@
+#import ../game_setup/console_code_helpers.py
+
 import example_panels.mast

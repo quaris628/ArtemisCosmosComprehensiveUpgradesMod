@@ -329,8 +329,9 @@ default gamemaster_face = random_terran()
 //comms/gamemaster/commands/game/end if has_roles(COMMS_ORIGIN_ID, 'gamemaster')
     +[$gamemaster]"No don't end the game" //comms
     +[$gamemaster]"Yes end the game":
-        START_TEXT = "Mission ended."
-        signal_emit("show_game_results", None)
+        GAME_STATISTICS = get_game_statistics()
+        GAME_STATISTICS.record_game_end(reason="the Gamemaster has ended the game.")
+        end_game()
 
 
 

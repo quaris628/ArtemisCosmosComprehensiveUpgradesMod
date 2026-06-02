@@ -10,13 +10,25 @@ shared ALLOW_DOC_REFRESH  = SETTINGS.get("ALLOW_DOC_REFRESH", is_dev_build())
     default document_topic = "__root__"
     default document_watch_task = None
     default document_back_tab = ""
-
+    
+    if not ensure_on_gui_task(document_screen):
+        ->END
+    
+    gui_section(style="area:70,0,100,36px;")
+    # Use separate button and text label to work around not
+    # being able to "justify:center;" a button's built-in label
+    back_button = gui_button("")
+    gui_section(style="area:70,0,100,36px;")
+    gui_text("Back", style=f"font:gui-3;justify:center;color:{color_text()};")
+    
+    on gui_message(back_button):
+        gui_switch_to(_get_document_back_button_label())
+    
     if ALLOW_DOC_REFRESH:
         if document_watch_task is not None:
             document_watch_task.cancel()
         document_watch_task = gui_sub_task_schedule(document_watch)
 
-    gui_tab_back(document_back_tab )
     gui_activate_console(document_type)
 
     # Whole screen
@@ -79,7 +91,7 @@ $t {item.get("display_text", "")}
 """
         text.value = t
 
-    await gui()
+    await gui_patched()
     ->END
 
 === document_watch
@@ -95,7 +107,7 @@ $t {item.get("display_text", "")}
     cur_file_time = file_get_time(file_path)
 
     if cur_file_time != last_file_time is not None:
-        gui_task_jump(document_screen)
+        gui_switch_to("document_screen")
     last_file_time = cur_file_time
 
     jump document_watch

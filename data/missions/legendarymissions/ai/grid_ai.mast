@@ -9,41 +9,40 @@ default shared grid_data = grid_get_grid_data()
 
 
 //spawn if has_role(SPAWNED_ID, "__player__")
-    #
-    # This waits until the game is started
-    # Ship type could be changed by helm
-    #
-    await delay_sim(1)
-    #
-    # Create the interior for the ship, defined in grid_ai
-    #
-    still_around = to_object(SPAWNED_ID)
-    ->END if still_around is None
-    grid_rebuild_grid_objects(SPAWNED_ID, grid_data)
-    #
-    # Handle jump vs Warp drive
-    #
-    is_warp = False
-    is_jump = False
-    warp_nodes = to_object_list(grid_objects(SPAWNED_ID) & role("warp"))
-    #
-    _jump_nodes = to_object_list(grid_objects(SPAWNED_ID) & role("jump"))
-
-    is_warp = len(warp_nodes) > 0
-    is_jump = len(_jump_nodes) > 0
-
-    _warp = 1 if is_warp else 0
-    _jump = 1 if is_jump else 0
-    _label = "JUMP" if is_jump else "WARP"
-
-    blob = to_blob(SPAWNED_ID)
-    blob.set("warp_drive_active",_warp,0)
-    blob.set("jump_drive_active", _jump,0)
-    blob.set("eng_control_label", _label, 3)
-
-    # prefab_spawn(prefab_lifeform_damcons, {"ship_id": SPAWNED_ID})
-
-
+    # This delay seems to be necessary in order for the engineering
+    # grid widget to be colored correctly. I don't know why.
+    await delay_app(0.1)
+    
+    player_ship_object = to_space_object(SPAWNED_ID)
+    if player_ship_object is None:
+        ->END
+    
+    VESSEL_TYPES_DATA = get_vessel_types_data()
+    player_ship_type = VESSEL_TYPES_DATA.get_ship_type_from_key(player_ship_object.art_id)
+    
+    # If grid_rebuild_grid_objects is called for a ship type key that
+    # is not in grid_data, then an engine-level server crash happens.
+    if player_ship_object.art_id in grid_data:
+        # Create the interior for the ship, defined in grid_ai
+        grid_rebuild_grid_objects(SPAWNED_ID, grid_data)
+    
+    # I have absolutely no clue why, but jump_drive_active needs to be set in
+    # setup_game() in controller_game_setup_data.py, while warp_drive_active and
+    # eng_control_label need to be set here. Otherwise, when the game starts
+    # and the helm/engineering consoles were ready beforehand, then the helm console
+    # might enable the wrong controls, and the engineering console might show the
+    # incorrect subsystem label.
+    player_ship_object.data_set.set("warp_drive_active", player_ship_type.has_warp_drive, 0)
+    if player_ship_type.has_warp_drive and player_ship_type.has_jump_drive:
+        drive_label = "HYBRID DRIVE"
+    elif player_ship_type.has_warp_drive:
+        drive_label = "WARP"
+    elif player_ship_type.has_jump_drive:
+        drive_label = "JUMP"
+    else:
+        drive_label = "N/A"
+    player_ship_object.data_set.set("eng_control_label", drive_label, 3)
+    
     ->END
 
 

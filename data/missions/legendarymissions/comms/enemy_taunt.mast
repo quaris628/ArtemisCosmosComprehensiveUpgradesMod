@@ -7,8 +7,9 @@ shared taunt_data = load_json_string(media_read_relative_file("taunts.json"))
 =$raider red,white
 
 
-//spawn has_roles(SPAWNED_ID, "ship")
-if taunt_data is not None:
+//spawn if has_roles(SPAWNED_ID, "ship")
+    if taunt_data is None:
+        ->END
     #
     # Select 3 taunts
     #

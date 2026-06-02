@@ -15,7 +15,10 @@
 ======== hangar_schedule_mission
         
 ---- wait_for_game_started
-    if not GAME_STARTED:
+    # TODO this might need to be reworked to allow restarting a game
+    # without restarting the entire mission script?
+    game_state = get_game_state()
+    if not (game_state == game_state_running() or game_state == game_state_paused()):
         await delay_sim(3)
         jump wait_for_game_started
     ->END if to_object(CRAFT_ID) is None

@@ -1,0 +1,118 @@
+
+set_is_console_ship_specific("mainscreen", True)
+
+//shared/signal/player_ship_created
+    initialize_mainscreen_view_facing_and_mode(PLAYER_SHIP_ID)
+    ->END
+
+@console/mainscreen !0 ^30 "Mainscreen" if MAINSCREEN_CONSOLE_ENABLED
+    " The main viewscreen
+    
+    if not prepare_console("mainscreen", widget_list="3dview^2dview^ship_internal_view^ship_data^text_waterfall"):
+        ->END
+    
+    default tab = 1
+    gui_section(style="area:0,45px,100-300px,100;")
+    with gui_sub_section("col-width:280px;"):
+        gui_row("row-height: 400px;")
+        gui_info_panel(tab=tab)
+        gui_info_panel_add("message", 83, gui_panel_console_message, None, gui_panel_console_message_tick)
+    
+    # Unfortunately, as far as I know, there is no way to call gui_hide
+    # or gui_show on widgets whose positions respect GUIBoxData.txt.
+    # They have to be positioned by the script instead.
+    gui_section(style="area:0,36px,100,100;")
+    widget_3d_view = gui_layout_widget("3dview")
+    gui_section(style="area:0,36px,100,100;")
+    widget_2d_view = gui_layout_widget("2dview")
+    gui_section(style="area:0,36px,100,100;")
+    widget_internal_view = gui_layout_widget("ship_internal_view")
+    
+    task_schedule(mainscreen_console_sync_after_delay)
+    
+    await gui_patched()
+
+==== mainscreen_console_sync_after_delay ====
+    # If an element is hidden prior to it being presented for the first time,
+    # then it will never show again.
+    # https://github.com/artemis-sbs/LegendaryMissions/issues/513#issuecomment-3931007180
+    # So work around this by adding a short delay before hiding the element,
+    # so that the element will (hopefully) have been presented already by the
+    # time gui_hide is called.
+    await delay_app(0)
+    jump mainscreen_console_sync_view_mode_and_facing
+
+==== on_mainscreen_change ====
+    player_ship_id = sbs.get_ship_of_client(client_id)
+    
+    # This label will run for every mainscreen client (or server) for
+    # each time that client's ship's mainscreen settings were changed by the
+    # helm/weapons mainscreen control widget or keybinds.
+    # (The code that does this is route_console_mainscreen_change(on_mainscreen_change)
+    # in initialize.mast.)
+    
+    # Note that this means the ship's view, facing, and mode will be set multiple times
+    # if there are multiple mainscreen clients for that ship.
+    # It also means the mainscreen state won't be updated by clicking the widget if
+    # there are no clients that are currently displaying that ship's mainscreen.
+    # This isn't ideal, but as far as I know there is no client-independent event
+    # for mainscreen view/facing/mode changes that's feasible for mast-scheduled
+    # stuff to hook into.
+    # Highly relevant: https://github.com/artemis-sbs/LegendaryMissions/issues/610#issuecomment-4270270875
+    
+    # This table shows all possible combinations that the MAIN_SCREEN_VIEW,
+    # MAIN_SCREEN_FACING, and MAIN_SCREEN_MODE variables that get passed to
+    # this label can be set to, and the corresponding button press that creates
+    # that combination.
+    # View      Facing      Mode            Pressed Button
+    # 3d_view   front       cinematic       FRONT
+    # 3d_view   back        cinematic       BACK
+    # 3d_view   left        cinematic       LEFT
+    # 3d_view   right       cinematic       RIGHT
+    # 3d_view   a           first_person    INSIDE
+    # 3d_view   a           chase           CHASE
+    # 3d_view   a           tracking        TRACK
+    # lrs       a           cinematic       LRS
+    # tactical  a           cinematic       TACT
+    # data      a           cinematic       DATA
+    #print(f"MAIN_SCREEN_VIEW={MAIN_SCREEN_VIEW} MAIN_SCREEN_FACING={MAIN_SCREEN_FACING} MAIN_SCREEN_MODE={MAIN_SCREEN_MODE}")
+    
+    set_mainscreen_view(player_ship_id, MAIN_SCREEN_VIEW)
+    if MAIN_SCREEN_FACING != "a":
+        set_mainscreen_facing(player_ship_id, MAIN_SCREEN_FACING)
+    if MAIN_SCREEN_MODE != "cinematic":
+        set_mainscreen_mode(player_ship_id, MAIN_SCREEN_MODE)
+    
+    task_schedule(mainscreen_console_sync_view_mode_and_facing)
+    
+    yield idle
+
+==== mainscreen_console_sync_view_mode_and_facing ====
+    player_ship_id = sbs.get_ship_of_client(client_id)
+    view = get_mainscreen_view(player_ship_id)
+    facing = get_mainscreen_facing(player_ship_id)
+    mode = get_mainscreen_mode(player_ship_id)
+    
+    if view == "3d_view":
+        gui_show(widget_3d_view)
+        gui_hide(widget_2d_view)
+        gui_hide(widget_internal_view)
+    elif view in ["lrs", "tactical"]:
+        gui_hide(widget_3d_view)
+        gui_show(widget_2d_view)
+        gui_hide(widget_internal_view)
+    elif view == "data":
+        gui_hide(widget_3d_view)
+        gui_hide(widget_2d_view)
+        gui_show(widget_internal_view)
+    else:
+        print("WARNING: unrecognized mainscreen view '{view}'")
+        gui_hide(widget_3d_view)
+        gui_hide(widget_2d_view)
+        gui_hide(widget_internal_view)
+    gui_represent_patched(widget_3d_view)
+    gui_represent_patched(widget_2d_view)
+    gui_represent_patched(widget_internal_view)
+    sbs.set_main_view_modes(client_id, view, facing, mode)
+    
+    ->END

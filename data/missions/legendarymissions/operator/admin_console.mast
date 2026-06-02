@@ -1,8 +1,8 @@
 shared game_paused = False
-default shared OPERATOR_MODE_enabled = False
 
+set_is_console_ship_specific("admin", False)
 
-@console/admin !0 ^95 "Operator Admin" if OPERATOR_MODE_enabled
+@console/admin !0 ^95 "Operator Admin" if is_operator_mode_enabled()
 " A console for the game operator
 
     gui_section( style=f"area: 20, 40, 80, 40+40px;")

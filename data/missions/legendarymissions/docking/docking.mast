@@ -74,9 +74,17 @@ distance: 600
                 % Attempting dock when enemies are near is ill advised.
         comms_broadcast(DOCKING_PLAYER_ID, "docking disable, enemy near")
         yield fail
+    
+    set_inventory_value(DOCKING_PLAYER_ID, "new_dock_attempt_happened_flag", True)
 
 # This is called every 1 second
 +++ docked
+    # Record the successful dock attempt only once
+    if get_inventory_value(DOCKING_PLAYER_ID, "new_dock_attempt_happened_flag"):
+        set_inventory_value(DOCKING_PLAYER_ID, "new_dock_attempt_happened_flag", False)
+        GAME_STATISTICS = get_game_statistics()
+        GAME_STATISTICS.record_player_successful_dock(DOCKING_PLAYER_ID)
+    
     set_weapons_selection(DOCKING_PLAYER_ID, 0)
     grid_restore_damcons(DOCKING_PLAYER_ID)
     # if priority docking
@@ -193,7 +201,16 @@ target_roles: standard_docking
 match_side: True
 ```
 
++++ docking
+    set_inventory_value(DOCKING_PLAYER_ID, "new_dock_attempt_happened_flag", True)
+
 +++ docked
+    # Record the successful dock attempt only once
+    if get_inventory_value(DOCKING_PLAYER_ID, "new_dock_attempt_happened_flag"):
+        set_inventory_value(DOCKING_PLAYER_ID, "new_dock_attempt_happened_flag", False)
+        GAME_STATISTICS = get_game_statistics()
+        GAME_STATISTICS.record_player_successful_dock(DOCKING_PLAYER_ID)
+    
     set_weapons_selection(DOCKING_PLAYER_ID, 0)
     start_counter(DOCKING_PLAYER_ID, "refuel")
     start_counter(DOCKING_PLAYER_ID, "torps")

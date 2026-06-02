@@ -1,0 +1,161 @@
+# Gui for console selection
+
+signal_register(signal_before_player_ship_destroyed(), gui_console_selection_before_player_ship_destroyed)
+default TASK_LISTEN_FOR_AFTER_PLAYER_SHIP_DESTROYED = None
+
+==== gui_console_selection_before_player_ship_destroyed =====
+    if client_id == 0:
+        # The server's screen is handled separately at the bottom of gui_game_setup.mast
+        # It shouldn't ever be switched to console selection
+        ->END
+    selected_ship = GAME_SETUP_DATA.get_selected_ship(client_id)
+    if selected_ship is None:
+        ->END
+    if DESTROYING_PLAYER_SHIP_ID != selected_ship.spawned_ship_id:
+        ->END
+    GAME_SETUP_DATA = get_game_setup_data()
+    if not GAME_SETUP_DATA.is_client_ready(client_id):
+        ->END
+    
+    # TODO what if game ends at the same time?
+    # I think the code would attempt to switch to both console select and game end?
+    # Which might be resolved based on which signal listener fires first?
+    # Artemis 2 shows console select on clients in this case (but game end screen on server)
+    # but showing end game screen on clients seems preferable to me
+    
+    signal_register(signal_after_player_ship_destroyed(), gui_console_selection_after_player_ship_destroyed)
+    set_inventory_value(client_id, "gui_console_selection_task_listener_for_after_player_ship_destroyed", get_current_task())
+    
+    yield idle
+
+==== gui_console_selection_after_player_ship_destroyed ====
+    listener_task = get_inventory_value(client_id, "gui_console_selection_task_listener_for_after_player_ship_destroyed")
+    task_cancel(listener_task)
+    gui_switch_to(gui_console_selection_main)
+    ->END
+
+==== gui_console_selection_routed_from_change_console_button ====
+    if is_game_in_progress():
+        get_game_setup_data().client_unready(client_id)
+    
+    gui_switch_to(gui_console_selection_main)
+    ->END
+
+==== gui_console_selection_main ====
+    
+    if not ensure_on_gui_task(gui_console_selection_main):
+        ->END
+    
+    create_skybox_background_on_client(client_id)
+    
+    # clear all old client-ship links?
+    old_ship_id = sbs.get_ship_of_client(client_id)
+    unlink(old_ship_id, "consoles", client_id)
+    # As far as I know, there's no (non-buggy) way to clear the
+    # engine's client-to-ship assignment.
+    # If you do
+    # 'sbs.assign_client_to_ship(client_id, 0)'
+    # then client crashes sometimes happen in REALLY weird situations.
+    # (E.g. very good chance of a crash when entering console selection
+    # when exiting mainscreen or cinematic, because mainscreen and
+    # cinematic have a 3d view widget and console selection has enough
+    # ship checkboxes to inflate the ~50%-50% chance of crashing that is
+    # rolled each time a checkbox gets drawn on that new gui.)
+    
+    # the CONSOLE_TYPE inventory value is read by the upgrade tab and some gamemaster comms stuff
+    # it should be set to the currently-open screen on the client
+    set_inventory_value(client_id, "CONSOLE_TYPE", "unassigned")
+    
+    # TODO respect these settings
+    #shared SHIP_PICK_READ_ONLY  = SETTINGS.get("SHIP_PICK_READ_ONLY", False)
+    #shared CAN_CHANGE_CONSOLE  = SETTINGS.get("CAN_CHANGE_CONSOLE", True)
+    
+    # getting data
+    VESSEL_TYPES_DATA = get_vessel_types_data()
+    GAME_SETUP_DATA = get_game_setup_data()
+    game_state = get_game_state()
+    selected_ship = GAME_SETUP_DATA.get_selected_ship(client_id)
+    
+    # top ribbon
+    gui_create_top_text_ribbon(game_state)
+    
+    create_help_button(gui_console_selection_main, unready_on_click=True)
+    
+    y_results = calculate_main_body_y_offsets_from_50()
+    ship_specific_section_top_y_offset_from_50 = y_results[0]
+    ship_agnostic_section_top_y_offset_from_50 = y_results[1]
+    
+    # Ships
+    y_offset_from_50 = ship_specific_section_top_y_offset_from_50
+    for player_ship in GAME_SETUP_DATA.player_ships.values():
+        y = offset_from_50_to_position_string(y_offset_from_50)
+        y_offset_from_50 += ship_checkbox_height() + vertical_space_between_checkboxes()
+        create_ship_checkbox(player_ship, client_id, "50-505px", y, "50-400px", "50-20px")
+    
+    # ship-specific consoles
+    y_offset_from_50 = ship_specific_section_top_y_offset_from_50
+    for console_identifier in selected_ship.get_all_console_slot_identifiers():
+        y = offset_from_50_to_position_string(y_offset_from_50)
+        y_offset_from_50 += console_checkbox_height() + vertical_space_between_checkboxes()
+        create_console_checkbox(console_identifier, client_id, "50+20px", y, "50+400px", "50+505px")
+    
+    # ship-agnostic consoles
+    y_offset_from_50 = ship_agnostic_section_top_y_offset_from_50
+    ship_agnostic_console_identifiers = GAME_SETUP_DATA.get_all_console_slot_identifiers()
+    if is_operator_mode_enabled() and not is_client_verified_operator_admin() and not GAMEMASTER_CONSOLE_ENABLED:
+        # In operator mode, gamemaster must be disabled in this special way
+        # so that it's still enabled for operator admin clients
+        ship_agnostic_console_identifiers = set(ship_agnostic_console_identifiers)
+        ship_agnostic_console_identifiers.discard("gamemaster")
+    for console_identifier in ship_agnostic_console_identifiers:
+        y = offset_from_50_to_position_string(y_offset_from_50)
+        y_offset_from_50 += console_checkbox_height() + vertical_space_between_checkboxes()
+        create_console_checkbox(console_identifier, client_id, "50-200px", y, "50+200px", "50+305px")
+    
+    # Readying
+    create_ready_control(client_id, "70-10px", "100-90px", "100-55px", "100-10px", "100-10px")
+    
+    # Customize ship
+    gui_create_customize_ship_button(client_id, "10px", "100-55px", "30+10px", "100-10px")
+    
+    # Operator mode admin
+    if is_operator_mode_enabled():
+        gui_section(style="area:0,36px,200px,72px;")
+        operator_admin_button = gui_button("")
+        # Use separate button and text label to work around not
+        # being able to "justify:center;" a button's built-in label
+        gui_section(style="area:0,36px,200px,72px;")
+        gui_text("Admin Access", style=f"font:gui-2;justify:center;color:{color_text_secondary()};")
+        on gui_message(operator_admin_button):
+            gui_switch_to(gui_operator_mode_admin_client_login)
+    
+    # Set up signal listeners
+    set_up_syncing_for_all_ship_checkboxes(client_id)
+    set_up_syncing_for_all_gui_console_checkboxes(client_id)
+    signal_register(signal_game_setup_data_client_ready_changed(client_id), gui_console_selection_on_client_ready, is_temporary=True)
+    signal_register(signal_game_started(), gui_console_selection_on_game_started, is_temporary=True)
+    
+    print(f"await gui_patched() ==== gui_console_selection_main ====")
+    await gui_patched()
+
+==== gui_console_selection_on_client_ready ====
+    GAME_SETUP_DATA = get_game_setup_data()
+    
+    if not (IS_READY and is_game_in_progress() and GAME_SETUP_DATA.can_client_enter_game(client_id)):
+        ->END
+    
+    jump_into_game(delay_reroute_workaround=True)
+    
+    ->END
+    
+
+==== gui_console_selection_on_game_started ====
+    print(f"gui_console_selection_on_game_started client_id={client_id}")
+    GAME_SETUP_DATA = get_game_setup_data()
+    
+    if not GAME_SETUP_DATA.is_client_ready(client_id):
+        ->END
+    
+    jump_into_game()
+    
+    ->END

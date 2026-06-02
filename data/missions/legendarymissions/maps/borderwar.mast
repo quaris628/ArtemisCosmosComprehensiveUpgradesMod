@@ -12,13 +12,13 @@ Properties:
     Player Ships: 'gui_int_slider("$text:int;low: 1.0;high:8.0;", var= "PLAYER_COUNT")'
     Difficulty: 'gui_int_slider("$text:int;low: 1.0;high:11.0;", var= "DIFFICULTY")'
   Map:
-    Terrain: 'gui_drop_down("$text: {TERRAIN_SELECT};list: none, few, some, lots, max",var="TERRAIN_SELECT")'
-    Lethal Terrain: 'gui_drop_down("$text: {LETHAL_SELECT};list: none, few, some, lots, max", var="LETHAL_SELECT")'
-    Friendly Ships: 'gui_drop_down("$text: {FRIENDLY_SELECT};list: none, few, some, lots, max", var="FRIENDLY_SELECT")'
-    Monsters: 'gui_drop_down("$text: {MONSTER_SELECT};list: none, few, some, lots, max", var="MONSTER_SELECT")'
-    Upgrades: 'gui_drop_down("$text: {UPGRADE_SELECT};list: none, few, some, lots, max", var= "UPGRADE_SELECT")'
-    Minutes to War: 'gui_input("desc: Minutes;", var="WAR_TIME_DELAY", listbox_container=map_options_listbox)'
-    Time Limit: 'gui_input("desc: Minutes;", var="GAME_TIME_LIMIT", listbox_container=map_options_listbox)'
+    Terrain: 'gui_drop_down("$text: {TERRAIN_SELECT};list: none, few, some, lots, max;color:#eee;",var="TERRAIN_SELECT")'
+    Lethal Terrain: 'gui_drop_down("$text: {LETHAL_SELECT};list: none, few, some, lots, max;color:#eee;", var="LETHAL_SELECT")'
+    Friendly Ships: 'gui_drop_down("$text: {FRIENDLY_SELECT};list: none, few, some, lots, max;color:#eee;", var="FRIENDLY_SELECT")'
+    Monsters: 'gui_drop_down("$text: {MONSTER_SELECT};list: none, few, some, lots, max;color:#eee;", var="MONSTER_SELECT")'
+    Upgrades: 'gui_drop_down("$text: {UPGRADE_SELECT};list: none, few, some, lots, max;color:#eee;", var= "UPGRADE_SELECT")'
+    Time Limit: 'gui_input("desc: Minutes;color:#eee;", var="GAME_TIME_LIMIT", listbox_container=map_options_listbox)'
+    Minutes to War: 'gui_input("desc: Minutes;color:#eee;", var="WAR_TIME_DELAY", listbox_container=map_options_listbox)'
 ```
 
 
@@ -39,7 +39,9 @@ Properties:
         elif upgrade_value == 4:
             num_upgrade = random.randint(10,15)
     print("Number of Upgrades: {num_upgrade}")
-
+    
+    GAME_SETUP_DATA = get_game_setup_data()
+    seed_value = GAME_SETUP_DATA.seed_value
     if seed_value != 0:
         random.seed(seed_value)
         print(f"Seed Value: {seed_value}")
@@ -163,7 +165,6 @@ Properties:
     shared war_declared = 0
     task_schedule(war_timer_loop)
     task_schedule(check_neutral_zone)
-    task_schedule(task_borderwar_end_game)
     ->END
 
 ======= war_timer_loop =========
@@ -215,7 +216,9 @@ Properties:
             comms_receive_internal(f"""NEUTRAL ZONE VIOLATION - Mission Failed!""", p, "TSN Command", title="NETURAL ZONE VIOLATION", title_color="red")
         await delay_sim(seconds=6)
         war_declared = 3
-    #    task_schedule(task_end_game)
+        GAME_STATISTICS = get_game_statistics()
+        GAME_STATISTICS.record_game_end(reason="TSN entered the Neutral Zone before war was declared.", is_success=False)
+        end_game()
         ->END
 
     await delay_sim(seconds=5)

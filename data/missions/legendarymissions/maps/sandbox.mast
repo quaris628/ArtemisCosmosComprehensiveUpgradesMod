@@ -1,26 +1,27 @@
-@map/sandbox "Game master sandbox"
+@map/sandbox "Game Master Sandbox"
 " An empty map.
 " Useful as a blank slate for game masters to set up custom scenarios on, by using the Game Master console to spawn objects.
 " To end the game, use the Game Master command 'end game', or set a time limit.
+" The upgrades setting still affects the chance that destroying a wreck will drop an upgrade.
 metadata:``` yaml
 Properties:
   Main:
     Player Ships: 'gui_int_slider("$text:int;low: 1.0;high:8.0;", var= "PLAYER_COUNT")'
     Difficulty: 'gui_int_slider("$text:int;low: 1.0;high:11.0;", var= "DIFFICULTY")'
   Map:
-    Terrain: 'gui_drop_down("$text: {TERRAIN_SELECT};list: none, few, some, lots, max",var="TERRAIN_SELECT")'
-    Lethal Terrain: 'gui_drop_down("$text: {LETHAL_SELECT};list: none, few, some, lots, max", var="LETHAL_SELECT")'
-    Friendly Ships: 'gui_drop_down("$text: {FRIENDLY_SELECT};list: none, few, some, lots, max", var="FRIENDLY_SELECT")'
-    Monsters: 'gui_drop_down("$text: {MONSTER_SELECT};list: none, few, some, lots, max", var="MONSTER_SELECT")'
-    Upgrades: 'gui_drop_down("$text: {UPGRADE_SELECT};list: none, few, some, lots, max", var= "UPGRADE_SELECT")'
-    Time Limit: 'gui_input("desc: Minutes;", var="GAME_TIME_LIMIT", listbox_container=map_options_listbox)'
+    Terrain: 'gui_text("$text: None;color:#eee;")'
+    Lethal Terrain: 'gui_text("$text: None;color:#eee;")'
+    Friendly Ships: 'gui_text("$text: None;color:#eee;")'
+    Monsters: 'gui_text("$text: None;color:#eee;")'
+    Upgrades: 'gui_drop_down("$text: {UPGRADE_SELECT};list: none, few, some, lots, max;color:#eee;", var= "UPGRADE_SELECT")'
+    Time Limit: 'gui_input("desc: Minutes;color:#eee;", var="GAME_TIME_LIMIT", listbox_container=map_options_listbox)'
 ```
 
 
-    terrain_value = terrain_to_value(TERRAIN_SELECT)
-    lethal_value =  terrain_to_value(LETHAL_SELECT)
-    friendly_value = terrain_to_value(FRIENDLY_SELECT)
-    monster_value = terrain_to_value(MONSTER_SELECT)
+    terrain_value = 0
+    lethal_value =  0
+    friendly_value = 0
+    monster_value = 0
     upgrade_value = terrain_to_value(UPGRADE_SELECT)
         
     
@@ -35,6 +36,7 @@ Properties:
     await task_schedule(spawn_players)
     await task_schedule(default_player_friendly_eyes)
     await task_schedule(docking_standard_player_station)
-
+    
+    set_game_end_conditions(end_if_no_enemies=False, end_if_no_ally_stations=False)
     #------------------------------------------------------------------------------------------------------------
 

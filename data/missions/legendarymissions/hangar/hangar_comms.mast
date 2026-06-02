@@ -12,7 +12,7 @@
         fighter_client = get_inventory_value(FIGHTER_ID, "client_id")
         if fighter_client is not None:
             set_dedicated_link(fighter_client, "craft_id", None)    
-            gui_reroute_client(fighter_client, show_hangar)
+            gui_switch_to("show_hangar", fighter_client)
 
 
     elif button ==  "shield_balance":

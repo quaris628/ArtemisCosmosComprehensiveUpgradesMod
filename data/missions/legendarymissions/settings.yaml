@@ -19,12 +19,33 @@ OPERATOR_MODE:
     logo: "media/LegendaryMissions/operator"
     show_logo_on_main: true
     pin: "000000"
+    
+    # Which console an operator admin client will show after the game starts.
+    # For ship-specific consoles, the admin client will start on ship 1, and
+    # if ship 1 gets destroyed, then the client will open the game results
+    # screen if the game has ended or console selection if it has not ended.
+    # If this console can't be selected by the admin client (it's either
+    # invalid or locked), then the admin client will attempt to select the
+    # gamemaster console, and if that fails too then it opens console selection.
+    console_after_game_starts: gamemaster
+    
+    # When this is enabled, the server will show (almost) nothing on its screen.
+    # This might be helpful for conserving computing resources on the machine
+    # that's running the server, if you're only using an admin client instead.
+    quasi_headless_server_mode: false
 
 #
 # Additional Lock down settings
 #
+# Even if it is set to read-only here, the server and operator
+# admin clients will always be able to edit player ships.
 SHIP_PICK_READ_ONLY: false
+
+# Currently, this setting is not respected
 CAN_CHANGE_CONSOLE: true
+# TODO figure out how to specify which client should be which console(s)
+# (Perhaps reading from client_string_set.txt but never programatically
+# writing to it will avoid triggering its data corruption bugs?)
 
 ### Very rough prototype of a comms interaction change 
 # COMMS_PROTOTYPE: true
@@ -36,13 +57,17 @@ CAN_CHANGE_CONSOLE: true
 # after further play testing
 NEW_DAMCONS: true
 
-GAMEMASTER: 
+GAMEMASTER:
+    # Even if it is disabled here, operator admin clients
+    # will always have access to the gamemaster console.
     enable: true
     beta: false
     menu_icon_size: 45 # Pixels
-### Uncomment the pin if you want the 
-###Gamemaster to require a pin
+    # Uncomment the pin if you want to require one to enter the gamemaster console.
+    # If a client has already had the operator mode pin entered in, then it will
+    # not require entering a pin again in order to enter the gamemaster console.
     #pin: "000000"
+
 #
 # These are the settings 
 # for standard docking
@@ -55,6 +80,22 @@ DOCKING:
     torps_delay: 6
     interior_delay: 2
     interior_count: 2
+
+# These control what the mainscreen shows when the game starts
+# Valid options for view: "3d_view", "lrs", "tactical", "data"
+DEFAULT_MAINSCREEN_VIEW: "3d_view"
+# Valid options for facing: "front", "back", "left", "right"
+DEFAULT_MAINSCREEN_FACING: "front"
+# Valid options for mode: "first_person", "chase", "tracking"
+DEFAULT_MAINSCREEN_MODE: "chase"
+# A default facing and mode should always be specified, even if the default view
+# is not the 3d view!
+# Why:
+# When a player switches to the 3d view for the first time, they can only do
+# so by pressing a button that selects either a facing or a mode; never both.
+# So if a player switches to the 3d view for the first time by selecting a facing,
+# then the mode will be the above default. And if a player switches to the 3d view
+# for the first time by selecting a mode, then the facing will be the above default.
 
 # Color theme for engineering
 # see grid_theme.json
@@ -117,4 +158,37 @@ PLAYER_LIST:
         ship: "tsn_battle_cruiser"
         face: "terran"
 
+# Console settings
+CONSOLE_EXCLUSIVITIES:
+    # Set to true to make the console only allow one person to take it at a time
+    
+    # ship-specific consoles
+    helm: true
+    weapons: true
+    engineering: true
+    science: true
+    comms: true
+    mainscreen: false
+    cinematic: false
+    display_panels: false
+    
+    # ship-agnostic consoles
+    hangar: false
+    gamemaster: true
+    admiral: true
+    
+    # If you're creating a custom console, you should add it to the above list.
+    # If a console isn't on this list, then it's assumed to be non-exclusive.
 
+# TODO setting for whether to warn vs. prevent when 2 clients try to acquire the same console
+# doing it with per-console granularity seems best
+
+# Makes the skybox background in the console selection, game setup,
+# game results, customize ship, etc. screens slowly scroll horizontally.
+# Unfortunately, enabling this seems to cause intermittent crashes.
+ENABLE_ANIMATED_SKYBOX_BACKGROUND_HACK: false
+
+# Allow starting a new game without requiring the mission script to be restarted.
+# Currently runs into a lot of crashes and is intended for developer use only.
+# The hope is to eventually get this working well enough to be enabled by default.
+ENABLE_NEW_GAME_WO_SCRIPT_RESTART: false
