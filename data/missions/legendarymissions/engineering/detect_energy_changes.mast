@@ -1,0 +1,42 @@
+import detect_energy_changes.py
+
+//shared/signal/game_started
+    
+    increase_triggers = get_increase_triggers()
+    decrease_triggers = get_decrease_triggers()
+    
+    previous_player_energy_levels = {}
+    
+    # This loop should end when the simulation ends.
+    # This may need to be updated if the feature to start second and
+    # subsequent games without restarting the entire mission script
+    # is added:  https://github.com/artemis-sbs/LegendaryMissions/issues/246
+    for ignored_var while True:
+        
+        for player_ship_id in role("__player__") - role("exploded"):
+            current_energy_level = to_object(player_ship_id).data_set.get("energy", 0)
+            
+            if player_ship_id in previous_player_energy_levels:
+                previous_energy_level = previous_player_energy_levels[player_ship_id]
+                
+                # increase
+                if previous_energy_level < current_energy_level:
+                    for trigger in increase_triggers:
+                        if previous_energy_level < trigger[0] and trigger[0] <= current_energy_level:
+                            energy_changed_event(trigger[1], player_ship_id)
+                # decrease
+                elif current_energy_level < previous_energy_level:
+                    for trigger in decrease_triggers:
+                        if current_energy_level <= trigger[0] and trigger[0] < previous_energy_level:
+                            energy_changed_event(trigger[1], player_ship_id)
+            
+            previous_player_energy_levels[player_ship_id] = current_energy_level
+        
+        # Currently the displays for energy, heat levels, and a lot of
+        # other game information are only refreshed about once per
+        # second, so there's probably not much value in increasing
+        # the frequency of this energy check beyond that.
+        # But if the displays' response times ever get improved,
+        # then this delay should probably be shortened accordingly,
+        # balancing performance as well.
+        await delay_sim(0.5)

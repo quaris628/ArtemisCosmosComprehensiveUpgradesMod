@@ -1,0 +1,19 @@
+
+===== start_overheating =====
+    player_ship_object = to_object(PLAYER_SHIP_ID)
+    
+    for ignored_var while True: # see break
+        energy_level = player_ship_object.data_set.get("energy", 0)
+        if energy_level < 4000 or has_role(PLAYER_SHIP_ID, "exploded"):
+            break
+        
+        # Add 2 percentage points of heat per second for each 1000 energy above 4000
+        # heat_added_per_second = 0.02 * (energy_level - 4000) / 1000
+        heat_added_per_second = 0.00002 * (energy_level - 4000)
+        
+        for heat_pool_index in range(4):
+            heat_level = player_ship_object.data_set.get("system_cur_heat", heat_pool_index)
+            heat_level += heat_added_per_second
+            player_ship_object.data_set.set("system_cur_heat", heat_level, heat_pool_index)
+        
+        await delay_sim(1)
