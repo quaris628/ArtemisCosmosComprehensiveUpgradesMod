@@ -42,7 +42,7 @@
 
   // this value defines the color of the whole GUI
   // it's a string, that follows the color format of CSS3.
-  "gui-color-main": "#ccf",
+  "gui-color-main": "#00a8ff",
   "gui-color-red-alert": "#600",
 
   // these values override the diplomatic relationship colors for this type of object
