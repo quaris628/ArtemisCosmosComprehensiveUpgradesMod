@@ -18,6 +18,7 @@ set_is_console_ship_specific("engineering", True)
 set_is_console_ship_specific("science", True)
 set_is_console_ship_specific("comms", True)
 set_is_console_ship_specific("cinematic", True)
+set_is_console_ship_specific("simplemap", True)
 
 #if is_dev_build():
 #    gui_tab_add_top("helm,comms,science,weapons,engineering")
@@ -107,4 +108,10 @@ set_is_console_ship_specific("cinematic", True)
             sbs.assign_client_to_ship(client_id, focus_id)
             gui_cinematic_auto(client_id)
 
+    await gui_patched()
+
+@console/simplemap !0 ^55 "Map"
+    " A simple 2d map view
+    if not prepare_console("simplemap", widget_list="2dview^radar_zoom_ctrl^ship_data^text_waterfall"):
+        ->END
     await gui_patched()

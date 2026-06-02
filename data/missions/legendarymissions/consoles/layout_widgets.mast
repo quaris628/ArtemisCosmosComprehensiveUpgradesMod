@@ -161,6 +161,14 @@ shared COMMS_PROTOTYPE  = SETTINGS.get("COMMS_PROTOTYPE", False)
         gui_info_panel(tab=tab)
         gui_info_panel_add("message", 83, gui_panel_console_message,None, gui_panel_console_message_tick)
 
+//gui/simplemap
+    default tab = 1
+    # Ship Data
+    gui_section(style="area:0,45px,100-300px,100;")
+    with gui_sub_section("col-width:280px;"):
+        gui_row("row-height: 400px;")
+        gui_info_panel(tab=tab)
+        gui_info_panel_add("message", 83, gui_panel_console_message, None, gui_panel_console_message_tick)
 
 
 
