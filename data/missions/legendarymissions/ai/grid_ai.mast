@@ -43,6 +43,12 @@ default shared grid_data = grid_get_grid_data()
         drive_label = "N/A"
     player_ship_object.data_set.set("eng_control_label", drive_label, 3)
     
+    # But also sync jump_drive_active again here; otherwise
+    # it won't be correct after the game starts for some reason
+    VESSEL_TYPES_DATA = get_vessel_types_data()
+    player_ship_type = VESSEL_TYPES_DATA.get_ship_type_from_key(player_ship_object.art_id)
+    player_ship_object.data_set.set("jump_drive_active", player_ship_type.has_jump_drive, 0)
+    
     ->END
 
 

@@ -26,8 +26,11 @@ set_is_console_ship_specific("cinematic", True)
     " Pilot the ship
     
     GAME_SETUP_DATA = get_game_setup_data()
-    player_ship_id = GAME_SETUP_DATA.get_selected_ship(client_id).spawned_ship_id
-    is_jump_drive_active = to_blob(player_ship_id).get("jump_drive_active", 0) == 1
+    VESSEL_TYPES_DATA = get_vessel_types_data()
+    player_ship_setup_data = GAME_SETUP_DATA.get_selected_ship(client_id)
+    player_ship_type = VESSEL_TYPES_DATA.get_ship_type_from_key(player_ship_setup_data.ship_type_key)
+    
+    is_jump_drive_active = player_ship_type.has_jump_drive
     
     if not prepare_console("helm", enable_helm_jump_drive_controls=is_jump_drive_active):
         ->END
