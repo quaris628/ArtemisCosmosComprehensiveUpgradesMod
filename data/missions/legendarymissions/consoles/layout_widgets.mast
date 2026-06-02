@@ -98,50 +98,25 @@ shared COMMS_PROTOTYPE  = SETTINGS.get("COMMS_PROTOTYPE", False)
     ->END
 
 //gui/normal_sci
-    ss = gui_screen_size(client_id)
-    # Ship Data overlap
-    gui_section(style="area:0,45px,100,100;")
+    player_ship_id = sbs.get_ship_of_client(client_id)
     
     default tab = 1
-    gui_row("row-height: 400px;col-width:280px;")
-    gui_info_panel(tab=tab)
-    gui_info_panel_add("message", 83, gui_panel_console_message,None, gui_panel_console_message_tick)
-
-    gui_section(style="area:0,45px,100,100;")
-    with gui_sub_section():
-        gui_row()
-        gui_layout_widget("science_2d_view")
-
-    # Right
-    with gui_sub_section("col-width:30;"):
-        gui_row("row-height:70px;")
-        gui_layout_widget("science_data_tabs")
-        gui_row("row-height:40px;")
-        gui_layout_widget("science_data_freq")
-        gui_row("row-height:200px;")
-        gui_layout_widget("science_data")
-        gui_row("row-height: 35px;")
-        default follow_tag = False
-        gui_checkbox("Follow","col-width:90px;", var="follow_tag")
-        if ss.x < 1600:
-            gui_row("row-height: 35px;col-width:25px;")
-        else:
-            gui_row("row-height: 35px;col-width:45px;")
+    # Ship Data
+    gui_section(style="area:0,45px,100-300px,100;")
+    with gui_sub_section("col-width:280px;"):
+        gui_row("row-height: 400px;")
+        gui_info_panel(tab=tab)
+        gui_info_panel_add("message", 83, gui_panel_console_message, None, gui_panel_console_message_tick)
         
-        
-        gui_row("row-height:20px;")
-        gui_blank()
-        gui_row()
-        gui_layout_widget("science_sorted_list")
-        gui_row("row-height: 10;")
-        gui_layout_widget("text_waterfall")
-
+    # Follow toggle
+    gui_section("area:85,95,100,100;")
+    default follow_tag = get_inventory_value(client_id, "2d_follow", True)
+    gui_checkbox("Follow", style=f"color:{color_text()};", var="follow_tag")
     on change follow_tag:
-        ship = sbs.get_ship_of_client(client_id)
-        _sel = get_science_selection(ship)
+        _sel = get_science_selection(player_ship_id)
         set_inventory_value(client_id, "2d_follow", follow_tag)
         science_set_2dview_focus(client_id, _sel)
-        
+    
     yield idle
 
 //focus/science if not has_role(SCIENCE_SELECTED_ID, 'admiral')
