@@ -4,92 +4,34 @@ shared COMMS_PROTOTYPE  = SETTINGS.get("COMMS_PROTOTYPE", False)
 
 #=== layout_comms_engine_widgets
 //gui/normal_comm
-
+    
     jump mike_comms if COMMS_PROTOTYPE
-
+    
     player_ship_id = sbs.get_ship_of_client(client_id)
     
-    gui_section(style="area:300px,30+50px, 700px,30+100px;")    
-    gui_layout_widget("radar_zoom_ctrl")
-            
-    # Left
-    gui_section(style="area:0,45px,100,100;")
-    
     default tab = 1
-    # Top Left
-    
+    # Ship Data
+    gui_section(style="area:0,45px,100-300px,100;")
     with gui_sub_section("col-width:280px;"):
         gui_row("row-height: 400px;")
-        #gui_layout_widget("ship_data")
         gui_info_panel(tab=tab)
-        gui_info_panel_add("message", 83, gui_panel_console_message,None, gui_panel_console_message_tick)
-        # if is_dev_build():
-        #     gui_info_panel_add("upgrades", 105, gui_panel_upgrade_list,None)
-        #     gui_info_panel_add("messages", 84, gui_panel_console_message_list,None)
-        #     gui_info_panel_add("objective", 85, gui_panel_console_message,None)
-        #     gui_info_panel_add("objectives", 86, gui_panel_console_message_list,None)
-
-        gui_row()
-        gui_blank()
+        gui_info_panel_add("message", 83, gui_panel_console_message, None, gui_panel_console_message_tick)
         
-        gui_row("row-height: 45px;margin:0,0,0,10px;")
-
-        follow_tag = get_inventory_value(client_id, "2d_follow", True)
-        # Set back in case of default
+    # Follow toggle
+    gui_section("area:0,95,15,100;")
+    default follow_tag = get_inventory_value(client_id, "2d_follow", True)
+    gui_checkbox("Follow", style=f"color:{color_text()};", var="follow_tag")
+    on change follow_tag:
+        _sel = get_science_selection(player_ship_id)
         set_inventory_value(client_id, "2d_follow", follow_tag)
-        gui_checkbox("Follow","col-width:90px;", var="follow_tag")
-        on change follow_tag:
-            ship = sbs.get_ship_of_client(client_id)
-            _sel = get_comms_selection(ship)
-            set_inventory_value(client_id, "2d_follow", follow_tag)
-            comms_set_2dview_focus(client_id, _sel)
-
-        gui_row("row-height: 40px;")
-        gui_layout_widget("red_alert")
-
-
-
-    # Middle
-    with gui_sub_section():
-        gui_row("row-height:30;")
-        gui_layout_widget("comms_waterfall")
-        gui_row()
-        gui_layout_widget("comms_2d_view")
-        
-    # Right
-    ss = gui_screen_size(client_id)
-
-    default select_2d = False
-    _widget = "comms_2d_view"
-    #if select_2d:
-    #    _widget = "comms_2d_view"
-    with gui_sub_section("col-width:25;"):
-        gui_row("row-height:100px;")
-        gui_layout_widget("comms_face")
-        
-        gui_row("row-height:15;")
-        options_property_list_box = gui_property_list_box("Options")
-        set_comms_options_property_list_box(options_property_list_box)
-        signal_register(signal_comms_property_list_box_update_ship_to_ship(player_ship_id), _gui_comms_on_property_list_box_update_ship_to_ship, is_temporary=True)
-        
-        gui_row()
-        gui_layout_widget("comms_control")
-
-
-
-        if ss.x < 1600:
-            gui_row("row-height: 35px;col-width:25px;")
-        else:
-            gui_row("row-height: 35px;col-width:45px;")
-
-
-        gui_row("row-height:20px;")
-        gui_blank()
-        gui_row() #"padding:0,25px,10px,0")
-        gui_layout_widget("comms_sorted_list")
+        comms_set_2dview_focus(client_id, _sel)
     
-
-
+    # Message-specific options
+    gui_section("area:75,5,100,20;")
+    options_property_list_box = gui_property_list_box("Options")
+    set_comms_options_property_list_box(options_property_list_box)
+    signal_register(signal_comms_property_list_box_update_ship_to_ship(player_ship_id), _gui_comms_on_property_list_box_update_ship_to_ship, is_temporary=True)
+    
     yield idle
 
 ==== _gui_comms_on_property_list_box_update_ship_to_ship ====
