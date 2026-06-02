@@ -155,7 +155,7 @@ def hangar_get_ship_data_keys(docked_id):
     if craft_data is not None:
         return craft_data
 
-    craft_data = hangar_get_craft_data("terran")
+    craft_data = hangar_get_craft_data("tsn")
     if craft_data is not None:
         return craft_data
     

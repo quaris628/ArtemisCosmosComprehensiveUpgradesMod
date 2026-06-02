@@ -6,7 +6,7 @@ shared call_signs = hangar_get_call_signs()
 shared next_call_sign = 0
 
 # Just make sure the data loads
-hangar_get_craft_data("terran")
+hangar_get_craft_data("tsn")
 #
 # The route_spawn label is the entry point 
 # it examines the SPAWNED_ID to either

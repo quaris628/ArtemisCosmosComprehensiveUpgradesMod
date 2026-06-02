@@ -28,7 +28,7 @@
 
     station_object = npc_spawn(st_x, START_Y, st_z, name, s_roles, station_type, "behav_station")
     ds = to_id(station_object)
-    if (race_value is None or race_value == "terran") and side_value == "tsn":
+    if (race_value is None or race_value == "terran" or race_value == "tsn") and side_value == "tsn":
         # Force TSN terran faces to have military uniforms
         set_face(ds, random_terran(civilian=True))
     set_face(ds, random_face(race_value))
@@ -48,7 +48,7 @@ display_text: Command Base
 station_type: starbase_command
 side_value: tsn
 roles_value: station
-race_value: terran
+race_value: tsn
 ```
     jump common_station_create 
 
@@ -58,7 +58,7 @@ display_text: Civil Station
 station_type: starbase_civil
 side_value: civ
 roles_value: station
-race_value: terran
+race_value: tsn
 ```
     jump common_station_create 
 
@@ -68,7 +68,7 @@ display_text: Industry station
 station_type: starbase_industry
 side_value: civ
 roles_value: station
-race_value: terran
+race_value: tsn
 ```
     jump common_station_create 
 
@@ -78,7 +78,7 @@ display_text: Science station
 station_type: starbase_science
 side_value: civ
 roles_value: station
-race_value: terran
+race_value: tsn
 ```
     jump common_station_create 
 

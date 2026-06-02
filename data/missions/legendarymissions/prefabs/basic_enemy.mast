@@ -56,7 +56,7 @@ brain:
 
     ship = to_object(npc_spawn(START_X, START_Y, START_Z, name, side_value+","+ship_role, ship_art, "behav_npcship"))
     if face is None:
-        if (crew is None or crew=="terran") and side_value == "tsn":
+        if (crew is None or crew=="terran" or crew == "tsn") and side_value == "tsn":
             # Force terran defenders to be military and not civilian
             set_face(ship.id, random_terran(civilian=False))
         set_face(ship.id, random_face(crew))

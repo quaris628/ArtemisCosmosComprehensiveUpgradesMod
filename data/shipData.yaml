@@ -704,7 +704,7 @@
       #---------------------------------- Starbase data --------------------------------
       "key": "starbase_command",
       "name": "Command Starbase",
-      "origin": "Terran",
+      "origin": "TSN",
       "side": "USFP",
       "artfileroot": "tsn-big-base",
       "meshscale": 14.5201349258423,
@@ -742,7 +742,7 @@
       #---------------------------------- Starbase data --------------------------------
       "key": "starbase_civil",
       "name": "Civilian Starbase",
-      "origin": "Terran",
+      "origin": "TSN",
       "side": "USFP",
       "artfileroot": "civil_station",
       "meshscale": 10.0,
@@ -762,7 +762,7 @@
       #---------------------------------- Starbase data --------------------------------
       "key": "starbase_industry",
       "name": "Industrial Starbase",
-      "origin": "Terran",
+      "origin": "TSN",
       "side": "USFP",
       "artfileroot": "industry_station",
       "meshscale": 10.0,
@@ -782,7 +782,7 @@
       #---------------------------------- Starbase data --------------------------------
       "key": "starbase_science",
       "name": "Science Starbase",
-      "origin": "Terran",
+      "origin": "TSN",
       "side": "USFP",
       "artfileroot": "science_station",
       "meshscale": 12.3993291854858,
@@ -1105,7 +1105,7 @@
       #---------------------------------- ship data --------------------------------
       "key": "tsn_light_cruiser",
       "name": "Light Cruiser",
-      "origin": "Terran",
+      "origin": "TSN",
       "side": "TSN",
       "artfileroot": "tsn_light_cruiser",
       "meshscale": 0.171711415052414,
@@ -1217,7 +1217,7 @@
       #---------------------------------- ship data --------------------------------
       "key": "tsn_shuttle",
       "name": "Shuttle",
-      "origin": "Terran",
+      "origin": "TSN",
       "side": "TSN",
       "artfileroot": "TSNshuttle",
       "meshscale": 0.0421140976250172,
@@ -1298,7 +1298,7 @@
       #---------------------------------- ship data --------------------------------
       "key": "tsn_fighter",
       "name": "Fighter",
-      "origin": "Terran",
+      "origin": "TSN",
       "side": "TSN",
       "artfileroot": "TSNfighter",
       "meshscale": 0.25,
@@ -1395,7 +1395,7 @@
       #---------------------------------- ship data --------------------------------
       "key": "tsn_bomber",
       "name": "Bomber",
-      "origin": "Terran",
+      "origin": "TSN",
       "side": "TSN",
       "artfileroot": "TSN_Bomber",
       "meshscale": 0.0299999993294477,
@@ -1492,7 +1492,7 @@
     {
       "key": "tsn_battle_cruiser",
       "name": "Battle Cruiser",
-      "origin": "Terran",
+      "origin": "TSN",
       "side": "TSN",
       "artfileroot": "TSN_BattleCruiser",
       "meshscale": 0.189593434333801,
@@ -1631,7 +1631,7 @@
     {
       "key": "tsn_carrier",
       "name": "Carrier",
-      "origin": "Terran",
+      "origin": "TSN",
       "side": "TSN",
       "artfileroot": "TSNCarrier",
       "meshscale": 0.191587820649147,
@@ -1759,7 +1759,7 @@
     {
       "key": "tsn_light_carrier",
       "name": "Light Carrier",
-      "origin": "Terran",
+      "origin": "TSN",
       "side": "TSN",
       "artfileroot": "TSN_light_Carrier",
       "meshscale": 0.12073890119791,
@@ -1886,7 +1886,7 @@
     {
       "key": "tsn_battleship",
       "name": "BattleShip",
-      "origin": "Terran",
+      "origin": "TSN",
       "side": "TSN",
       "artfileroot": "TSNBattleship",
       "meshscale": 0.223782032728195,
@@ -2033,7 +2033,7 @@
     {
       "key": "tsn_mine_layer",
       "name": "Mine Layer",
-      "origin": "Terran",
+      "origin": "TSN",
       "side": "TSN",
       "artfileroot": "TSN_MineLayer",
       "meshscale": 0.121342279016972,
@@ -2146,7 +2146,7 @@
     {
       "key": "tsn_warpster",
       "name": "Warpster",
-      "origin": "Terran",
+      "origin": "TSN",
       "side": "TSN",
       "artfileroot": "TSN_Warpster",
       "meshscale": 0.0293077416718006,
@@ -2236,7 +2236,7 @@
     {
       "key": "tsn_juggernaut",
       "name": "Juggernaut",
-      "origin": "Terran",
+      "origin": "TSN",
       "side": "TSN",
       "artfileroot": "TSN_Juggernaut",
       "meshscale": 0.281182438135147,
@@ -2423,7 +2423,7 @@
     {
       "key": "tsn_missile_cruiser",
       "name": "Missile Cruiser",
-      "origin": "Terran",
+      "origin": "TSN",
       "side": "TSN",
       "artfileroot": "tsn_missile_cruiser",
       "meshscale": 0.164697989821434,
@@ -2536,7 +2536,7 @@
     {
       "key": "tsn_destroyer",
       "name": "Destroyer",
-      "origin": "Terran",
+      "origin": "TSN",
       "side": "TSN",
       "artfileroot": "TSN_Destroyer",
       "meshscale": 0.0895302072167397,
@@ -2647,7 +2647,7 @@
     {
       "key": "tsn_dreadnought",
       "name": "Dreadnought",
-      "origin": "Terran",
+      "origin": "TSN",
       "side": "TSN",
       "artfileroot": "TSN_Dreadnought",
       "meshscale": 0.260198682546616,
@@ -2787,7 +2787,7 @@
     {
       "key": "tsn_escort",
       "name": "Escort",
-      "origin": "Terran",
+      "origin": "TSN",
       "side": "TSN",
       "artfileroot": "TSN_Escort",
       "meshscale": 0.10013423115015,
@@ -2898,7 +2898,7 @@
     {
       "key": "tsn_heavy_cruiser",
       "name": "Heavy Cruiser",
-      "origin": "Terran",
+      "origin": "TSN",
       "side": "TSN",
       "artfileroot": "TSN_Heavy_Cruiser",
       "meshscale": 0.183785244822502,
@@ -3023,7 +3023,7 @@
     {
       "key": "tsn_scout",
       "name": "Scout",
-      "origin": "Terran",
+      "origin": "TSN",
       "side": "TSN",
       "artfileroot": "TSN_Scout",
       "meshscale": 0.100000001490116,
@@ -4198,7 +4198,7 @@
     {
       "key": "transport_ship",
       "name": "Transport",
-      "origin": "Terran",
+      "origin": "TSN",
       "side": "USFP",
       "artfileroot": "transport",
       "meshscale": 5.82530164718628,
@@ -4294,7 +4294,7 @@
     {
       "key": "luxury_liner",
       "name": "Luxury Liner",
-      "origin": "Terran",
+      "origin": "TSN",
       "side": "USFP",
       "artfileroot": "leisure_vessel",
       "meshscale": 6.77265119552612,
@@ -4390,7 +4390,7 @@
     {
       "key": "cargo_ship",
       "name": "Cargo",
-      "origin": "Terran",
+      "origin": "TSN",
       "side": "USFP",
       "artfileroot": "cargo",
       "meshscale": 5.5595555305481,
@@ -4502,7 +4502,7 @@
     {
       "key": "science_ship",
       "name": "Science",
-      "origin": "Terran",
+      "origin": "TSN",
       "side": "USFP",
       "artfileroot": "science_vessel",
       "meshscale": 4.83322143554688,
@@ -4566,7 +4566,7 @@
     {
       "key": "biomech_a",
       "name": "Biomech A",
-      "origin": "Terran",
+      "origin": "TSN",
       "side": "Biomech",
       "artfileroot": "Drone1",
       "meshscale": 2.96728181838989,

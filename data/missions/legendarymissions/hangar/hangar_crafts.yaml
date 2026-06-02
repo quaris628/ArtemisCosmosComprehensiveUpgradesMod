@@ -1,5 +1,5 @@
-# Default can also be terran
-terran:
+# Default can also be tsn
+tsn:
   - key: tsn_fighter
     roles: fighter
   - key: tsn_bomber
