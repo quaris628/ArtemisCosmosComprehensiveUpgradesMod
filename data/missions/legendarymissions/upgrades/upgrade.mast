@@ -123,7 +123,7 @@ shared UPGRADE_TAB_ENABLED = True
     gui_row()
     
     can_activate_helm_upgrades = selected_ship.get_console_slot("helm").is_selected_by_client(client_id)
-    can_activate_weapons_upgrades = selected_ship.get_console_slot("weapons").is_selected_by_client(client_id)
+    can_activate_weapons_upgrades = selected_ship.get_console_slot("normal_weap").is_selected_by_client(client_id)
     can_activate_engineering_upgrades = selected_ship.get_console_slot("engineering").is_selected_by_client(client_id)
     can_activate_science_upgrades = selected_ship.get_console_slot("science").is_selected_by_client(client_id)
     can_activate_comms_upgrades = selected_ship.get_console_slot("comms").is_selected_by_client(client_id)

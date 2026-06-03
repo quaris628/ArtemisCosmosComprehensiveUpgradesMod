@@ -164,7 +164,7 @@ CONSOLE_EXCLUSIVITIES:
     
     # ship-specific consoles
     helm: true
-    weapons: true
+    normal_weap: true
     engineering: true
     science: true
     comms: true
