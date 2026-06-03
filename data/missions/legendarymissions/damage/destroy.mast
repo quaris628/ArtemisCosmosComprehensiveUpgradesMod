@@ -105,5 +105,6 @@
 //damage/killed if has_role(DAMAGE_SELECTED_ID, "surrendered")
     destroyed_by_player_ship_id = get_player_capital_ship_attributed_to_damage(DAMAGE_SOURCE_ID, DAMAGE_PARENT_ID)
     if destroyed_by_player_ship_id is not None:
+        killed_ship_obj = to_space_object(DAMAGE_SELECTED_ID)
         GAME_STATISTICS = get_game_statistics()
-        GAME_STATISTICS.record_player_killed_surrendered(destroyed_by_player_ship_id, DESTROYED)
+        GAME_STATISTICS.record_player_killed_surrendered(destroyed_by_player_ship_id, killed_ship_obj)
