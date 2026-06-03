@@ -176,15 +176,18 @@ shared COMMS_PROTOTYPE  = SETTINGS.get("COMMS_PROTOTYPE", False)
     
     gui_section(style=f"area: 0-5px,100-25px,{total_vertical_split_x}-20px,100;font:gui-1;justify:center")
     initial_text = "-"
+    # Necessary to explicitly specify background to work around bug
+    # where background is never shown until the game pauses
+    initial_background = "#00000000"
     system_texts_dict = ~~{
-        system_roles_beams(): gui_text(initial_text),
-        system_roles_torpedoes(): gui_text(initial_text),
-        system_roles_impulse(): gui_text(initial_text),
-        system_roles_special_warp_and_jump(): gui_text(initial_text),
-        system_roles_maneuver(): gui_text(initial_text),
-        system_roles_sensors(): gui_text(initial_text),
-        system_roles_front_shield(): gui_text(initial_text),
-        system_roles_rear_shield(): gui_text(initial_text),
+        system_roles_beams(): gui_text(initial_text, initial_background),
+        system_roles_torpedoes(): gui_text(initial_text, initial_background),
+        system_roles_impulse(): gui_text(initial_text, initial_background),
+        system_roles_special_warp_and_jump(): gui_text(initial_text, initial_background),
+        system_roles_maneuver(): gui_text(initial_text, initial_background),
+        system_roles_sensors(): gui_text(initial_text, initial_background),
+        system_roles_front_shield(): gui_text(initial_text, initial_background),
+        system_roles_rear_shield(): gui_text(initial_text, initial_background),
     }~~
     
     # Must be passed vars SYSTEM_ROLES, TEXT, BACKGROUND_COLOR
@@ -210,9 +213,7 @@ shared COMMS_PROTOTYPE  = SETTINGS.get("COMMS_PROTOTYPE", False)
         ->END
     text = system_texts_dict[SYSTEM_ROLES]
     text.value = TEXT
-    # background_color still has bugs; it doesn't change unless the sim pauses once
-    # So disable until more vanilla fixes come
-    #text.background_color = BACKGROUND_COLOR
+    text.background_color = BACKGROUND_COLOR
     gui_represent(text)
     ->END
 
