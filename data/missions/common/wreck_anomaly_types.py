@@ -43,6 +43,12 @@ def get_possible_anomaly_types_table(wreck_origin):
             (0.3, "cetrocite_crystal"),
             (0.2, "infusion_pcoils")
         ]
+    elif wreck_origin == "tsn":
+        return [
+            (0.5, "infusion_pcoils"),
+            (0.3, "hidens_powercell"),
+            (0.2, "lateral_array")
+        ]
     else: # wreck_origin == "skaraan" or is None or otherwise unrecognized
         # equal chance of all types of anomalies
         return [
@@ -74,6 +80,9 @@ def get_possible_anomaly_types_description(wreck_origin):
     elif wreck_origin == "ximni":
         # tauron_focuser, cetrocite_crystal, infusion_pcoils
         return "This is a wreck of a Ximni vessel, which might contain salvageable weapon, engineering, or engine parts."
+    elif wreck_origin == "tsn":
+        # infusion_pcoils, hidens_powercell, lateral_array
+        return "This is a wreck of a TSN vessel, which might contain salvageable engine parts, sensor parts, or energy cells."
     elif wreck_origin == "skaraan":
         # equal chance of all types of anomalies
         return "This is a wreck of a Skaaran vessel, which might contain salvageable parts of any kind!"

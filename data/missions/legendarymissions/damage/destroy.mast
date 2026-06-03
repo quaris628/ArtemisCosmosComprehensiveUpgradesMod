@@ -20,7 +20,7 @@
     sim.delete_navproxy_by_id(nav_id)
 
 
-//damage/killed if has_role(DAMAGE_SELECTED_ID, "raider")
+//damage/killed if has_any_role(DAMAGE_SELECTED_ID, "raider, tsn, civilian")
     #
     # Don't spawn a wreck in a black hole
     #
