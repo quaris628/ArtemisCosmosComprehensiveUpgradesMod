@@ -18,7 +18,9 @@ from sbs_utils.procedural.inventory import get_inventory_value, set_inventory_va
 from sbs_utils.procedural.comms import comms_broadcast
 import random
 
-from sbs_utils.procedural.internal_damage import grid_rebuild_grid_objects
+# Probably unnencessary since fighters don't have damcons, but still
+# override sbs_util's internal_damage.py everywhere for robustness
+from data.missions.common.procedural_internal_damage import grid_rebuild_grid_objects
 from sbs_utils.procedural.grid import grid_delete_objects
 from sbs_utils.fs import load_yaml_string
 from sbs_utils.procedural.gui.navigation import gui_reroute_client

@@ -1,5 +1,8 @@
 import ../../common/library_function_patches.py
 import ../../common/gui_color_scheme.py
+# Probably unnencessary since fighters don't have damcons, but still
+# override sbs_util's internal_damage.py everywhere for robustness
+import ../../common/procedural_internal_damage.py
 
 import ../game_setup/console_code_helpers.py
 

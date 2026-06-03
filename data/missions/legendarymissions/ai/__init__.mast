@@ -1,4 +1,6 @@
 import ../../common/repair_levels_display.py
+import ../../common/procedural_internal_damage.py
+
 import grid_ai.mast
 import npc_brains.mast
 import grid_brains.mast
