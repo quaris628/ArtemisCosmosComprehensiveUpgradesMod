@@ -34,14 +34,19 @@ hangar_get_craft_data("terran")
 
     shuttle_count = grid_count_grid_data(SPAWNED.art_id, "shuttle", 0)
     fighter_count = grid_count_grid_data(SPAWNED.art_id, "fighter", 0)
+    bomber_count = grid_count_grid_data(SPAWNED.art_id, "bomber", 0)
     set_inventory_value(SPAWNED_ID, "MAX_SHUTTLE", shuttle_count)
     set_inventory_value(SPAWNED_ID, "MAX_FIGHTER", fighter_count)
+    set_inventory_value(SPAWNED_ID, "MAX_BOMBER", bomber_count)
 
     for x in range(0,fighter_count):
         hangar_random_craft_spawn(SPAWNED_ID, "fighter")
 
     for x in range(0,shuttle_count):
         hangar_random_craft_spawn(SPAWNED_ID, "shuttle")
+    
+    for x in range(0, bomber_count):
+        hangar_random_craft_spawn(SPAWNED_ID, "bomber")
 
 
 //spawn if has_roles(SPAWNED_ID, "tsn, station")
@@ -51,10 +56,12 @@ hangar_get_craft_data("terran")
 
     shuttle_count = grid_count_grid_data(SPAWNED.art_id, "shuttle", 0)
     fighter_count = grid_count_grid_data(SPAWNED.art_id, "fighter", 0)
+    bomber_count = grid_count_grid_data(SPAWNED.art_id, "bomber", 0)
     set_inventory_value(SPAWNED_ID, "MAX_SHUTTLE", shuttle_count)
     set_inventory_value(SPAWNED_ID, "MAX_FIGHTER", fighter_count)
+    set_inventory_value(SPAWNED_ID, "MAX_BOMBER", bomber_count)
 
-    am = max(1,random.randint(0,fighter_count+shuttle_count))
+    am = max(1, random.randint(0, fighter_count + shuttle_count + bomber_count))
     for x in range(0,am):
         hangar_random_craft_spawn(SPAWNED_ID)
 

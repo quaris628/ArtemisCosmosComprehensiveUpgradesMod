@@ -59,6 +59,10 @@
                 "icon": 140,
                 "scale": 1.5
             },
+            "bomber": {
+                "icon": 140,
+                "scale": 1.5
+            },
             "shield": {
                 "icon": 106,
                 "scale": 1.5

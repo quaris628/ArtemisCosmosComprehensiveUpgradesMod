@@ -417,10 +417,13 @@ def hangar_attempt_dock_craft(craft_id, dock_rng = 600):
         docked_crafts = linked_to(home_id, "hangar_craft") & role("standby") & role("shuttle")
         max_refit = get_inventory_value(home_id, "MAX_SHUTTLE", 1)
         refit_cooef = max(1,len(docked_crafts) - max_refit)
-    else:
-        """ Treat fighters and bomber same """
-        docked_crafts = linked_to(home_id, "hangar_craft") & role("standby") & role("fighter") & role("bomber") 
+    elif has_role(craft_id, "fighter"):
+        docked_crafts = linked_to(home_id, "hangar_craft") & role("standby") & role("fighter")
         max_refit = get_inventory_value(home_id, "MAX_FIGHTER", 1)
+        refit_cooef = max(1,len(docked_crafts) - max_refit)
+    elif has_role(craft_id, "bomber"):
+        docked_crafts = linked_to(home_id, "hangar_craft") & role("standby") & role("bomber")
+        max_refit = get_inventory_value(home_id, "MAX_BOMBER", 1)
         refit_cooef = max(1,len(docked_crafts) - max_refit)
 
     set_timer(craft.id, "refit", seconds=int(30*refit_cooef))
