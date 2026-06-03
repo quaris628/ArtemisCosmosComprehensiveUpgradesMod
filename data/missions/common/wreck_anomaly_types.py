@@ -56,3 +56,27 @@ def get_possible_anomaly_types_table(wreck_origin):
             (1/9, "lateral_array"),
             (1/9, "haplix_overcharger")
         ]
+
+def get_possible_anomaly_types_description(wreck_origin):
+    """
+    Returns a message describing what types of anomalies a wreck of the given
+    origin might drop.
+    """
+    if wreck_origin == "kralien":
+        # lateral_array, hidens_powercell, carapaction_coil
+        return "This is a wreck of a Kralien vessel, which might contain salvageable sensor parts, shield parts, or energy cells."
+    elif wreck_origin == "arvonian":
+        # infusion_pcoils, lateral_array, hidens_powercell
+        return "This is a wreck of an Arvonian vessel, which might contain salvageable engine parts, shield parts, or energy cells."
+    elif wreck_origin == "torgoth":
+        # carapaction_coil, haplix_overcharger, cetrocite_crystal
+        return "This is a wreck of a Torgoth vessel, which might contain salvageable shield or engineering parts."
+    elif wreck_origin == "ximni":
+        # tauron_focuser, cetrocite_crystal, infusion_pcoils
+        return "This is a wreck of a Ximni vessel, which might contain salvageable weapon, engineering, or engine parts."
+    elif wreck_origin == "skaraan":
+        # equal chance of all types of anomalies
+        return "This is a wreck of a Skaaran vessel, which might contain salvageable parts of any kind!"
+    else: # wreck_origin is None or otherwise unrecognized
+        # equal chance of all types of anomalies
+        return "This wreck is of unknown origin. Who knows what it might drop!"
