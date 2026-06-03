@@ -40,7 +40,7 @@ set_is_console_ship_specific("simplemap", True)
 
 @console/normal_weap !0 ^10 "Weapons" if WEAPONS_CONSOLE_ENABLED
     " Protect the ship from enemies
-    if not prepare_console("normal_weap", widget_list="3dview^main_screen_control^shield_control^ship_data^text_waterfall^weap_beam_freq^weap_beam_speed^weap_torp_conversion^weapon_2d_view^weapon_control"):
+    if not prepare_console("normal_weap", widget_list="3dview^main_screen_control^shield_control^ship_data^text_waterfall^weap_beam_freq^weap_beam_speed^weapon_2d_view^weapon_control"):
         ->END
     await gui_patched()
 

@@ -1289,16 +1289,6 @@ weap_beam_speed
 100
 57
 normal_weap
-weap_torp_conversion
-79
-76
-100
-83
-79
-76
-100
-83
-normal_weap
 weapon_2d_view
 0
 5
