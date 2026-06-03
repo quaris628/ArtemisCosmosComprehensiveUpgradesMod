@@ -69,25 +69,9 @@
     ->END if dest_rand > dest_chance
 
     # If dest_rand is lower than dest_chance, a wreck is created at the same position as the destroyed ship. 
-    # We give the wreck a random yaw/pitch (so it spins a bit), set the radar color, and assign some inventory values
-    # to help determine later if it drops any particular upgrade. 
-
-    # note: changed to not use side or exact origin to avoid logic conflicts
-    # the role of side/origin wasn't used but confused other logic
-    wr = terrain_spawn(dest_posx, dest_posy, dest_posz, "Wreck", f"wreck, wreck_{dest_origin}", "wreck", "behav_wreck")
-    temp_yaw = random.uniform(0.001, 0.003)
-    temp_pitch = random.uniform(0.002, 0.004)
-    wr.engine_object.steer_yaw = temp_yaw
-    wr.engine_object.steer_pitch = temp_pitch
-    wr.blob.set("radar_color_override", "#f0c")
     
-    set_inventory_value(wr.id, "hp", 150)
-    wr.py_object.origin = dest_obj.origin # set_inventory_value(wr.id, "hull_side", dest_origin)
-    set_inventory_value(wr.id, "hull_type", dest_hull)
-    # wr_hp = get_inventory_value(wr.id, "hp", 0)
-    # wr_side = get_inventory_value(wr.id, "hull_side", 0)
-    # wr_hull = get_inventory_value(wr.id, "hull_type", 0)
-
+    spawn_wreck(dest_eobj.pos, dest_origin, dest_hull)
+    
     ->END
 
 # This never seems to run. The actual ship destruction from
