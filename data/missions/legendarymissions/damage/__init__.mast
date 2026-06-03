@@ -1,6 +1,7 @@
 import ../../common/controller_game_statistics.py
 import ../../common/repair_levels_display.py
 import ../../common/spawn_wreck.py
+import ../../common/wreck_anomaly_types.py
 
 import damage.mast
 import destroy.py

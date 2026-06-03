@@ -68,80 +68,26 @@
     upg_rand = random.randint(1,10)
     print(f"Wreck destroyed, drop random {upg_rand}, drop chance {upg_dropchance} origin {wr_origin}")
     ->END if upg_rand > upg_dropchance
-
-    # If we are dropping an upgrade, reroll upg_rand and determine upgrade based on the side value/race.
-    # For most races, they drop three different types of upgrades: Common (50%), Uncommon (30%), and Rare (20%)
-    # The upgrades are based loosely on what sort of technology they prefer. Torgoths have the highest shields, so
-    # their upgrades are usually shield-based. Ximni have the best beam weapons, so they carry tauron focusers. 
-    # Skaraans carry a wide variety of exotic alien technology, so they have an equal chance for every upgrade.
-    # If you're adding any new upgrades, make sure you add them to what the Skaraans might drop. 
-
-    upg_rand = random.randint(1, 10)
-    if wr_origin == "kralien":
-        if upg_rand >= 6 and upg_rand <= 10:
-            # Lateral Array 50%
-            pickup_spawn(wr_posx, wr_posy, wr_posz, "lateral_array")
-        elif upg_rand >= 3 and upg_rand <= 5:
-            # HiDens Powercell 30%
-            pickup_spawn(wr_posx, wr_posy, wr_posz, "hidens_powercell")
-        elif upg_rand >= 1 and upg_rand <= 2:
-            # Carapaction Coil 20%
-            pickup_spawn(wr_posx, wr_posy, wr_posz, "carapaction_coil")
-
-    if wr_origin == "arvonian":
-        if upg_rand >= 6 and upg_rand <= 10:
-            # Infusion P-Coils 50%
-            pickup_spawn(wr_posx, wr_posy, wr_posz, "infusion_pcoils")
-        elif upg_rand >= 3 and upg_rand <= 5:
-            # Lateral Array 30%
-            pickup_spawn(wr_posx, wr_posy, wr_posz, "lateral_array")
-        elif upg_rand >= 1 and upg_rand <= 2:
-            # HiDens Powercell 20%
-            pickup_spawn(wr_posx, wr_posy, wr_posz, "hidens_powercell")
-
-    if wr_origin == "torgoth":
-        if upg_rand >= 6 and upg_rand <= 10:
-            # Carapaction Coil 50%
-            pickup_spawn(wr_posx, wr_posy, wr_posz, "carapaction_coil")
-        elif upg_rand >= 3 and upg_rand <= 5:
-            # Haplix Overcharger 30%
-            pickup_spawn(wr_posx, wr_posy, wr_posz, "haplix_overcharger")
-        elif upg_rand >= 1 and upg_rand <= 2:
-            # Cetrocite Crystal 20%
-            pickup_spawn(wr_posx, wr_posy, wr_posz, "cetrocite_crystal")
-
-    if wr_origin == "ximni":
-        if upg_rand >= 6 and upg_rand <= 10:
-            # Tauron Focuser 50%
-            pickup_spawn(wr_posx, wr_posy, wr_posz, "tauron_focuser")
-        elif upg_rand >= 3 and upg_rand <= 5:
-            # Cetrocite Crystal 30%
-            pickup_spawn(wr_posx, wr_posy, wr_posz, "cetrocite_crystal")
-        elif upg_rand >= 1 and upg_rand <= 2:
-            # Infusion P-Coils 20%
-            pickup_spawn(wr_posx, wr_posy, wr_posz, "infusion_pcoils")
-
-    if wr_origin == "skaraan" or wr_origin is None:
-        upg_rand = random.randint(1,9)          # For all upgrades, equal chance. The Skaraans can be expected to carry any type of exotic technology.
-        if upg_rand == 1:
-            pickup_spawn(wr_posx, wr_posy, wr_posz, "carapaction_coil")
-        elif upg_rand == 2:
-            pickup_spawn(wr_posx, wr_posy, wr_posz, "infusion_pcoils")
-        elif upg_rand == 3:
-            pickup_spawn(wr_posx, wr_posy, wr_posz, "tauron_focuser")
-        elif upg_rand == 4:
-            pickup_spawn(wr_posx, wr_posy, wr_posz, "secret_codecase")
-        elif upg_rand == 5:
-            pickup_spawn(wr_posx, wr_posy, wr_posz, "hidens_powercell")
-        elif upg_rand == 6:
-            pickup_spawn(wr_posx, wr_posy, wr_posz, "vigoranium_nodule")
-        elif upg_rand == 7:
-            pickup_spawn(wr_posx, wr_posy, wr_posz, "cetrocite_crystal")
-        elif upg_rand == 8:
-            pickup_spawn(wr_posx, wr_posy, wr_posz, "lateral_array")
-        elif upg_rand == 9:
-            pickup_spawn(wr_posx, wr_posy, wr_posz, "haplix_overcharger")
-
+    
+    # Randomly pick anomaly_type according to the weights of all possible
+    # anomaly types
+    anomaly_types_table = get_possible_anomaly_types_table(wr_origin)
+    anomaly_type = None
+    anomaly_type_random = random.random()
+    cumulative_weight = 0
+    # For example, for three weights 0.5, 0.3, and 0.2,
+    # first we check anomaly_type_random < 0.5, if true use first entry;
+    # otherwise check anomaly_type_random < 0.8, if true use second entry;
+    # otherwise use last entry.
+    for anomaly_type_entry in anomaly_types_table[:-1]:
+        cumulative_weight += anomaly_type_entry[0]
+        if anomaly_type_random < cumulative_weight:
+            anomaly_type = anomaly_type_entry[1]
+    if anomaly_type is None:
+        anomaly_type = anomaly_types_table[-1][1]
+    
+    pickup_spawn(wr_posx, wr_posy, wr_posz, anomaly_type)
+    
     ->END
 
 //damage/object if has_role(DAMAGE_SOURCE_ID, "__player__") and (DAMAGE_PARENT_ID is None or DAMAGE_PARENT_ID == 0)
