@@ -1,18 +1,18 @@
-from .query import to_id, to_blob, to_object, to_list, to_set
-from .roles import role, add_role, remove_role, all_roles,has_role
-from .links import link,unlink
-from .inventory import get_inventory_value, set_inventory_value
-from .grid import grid_objects, grid_objects_at, grid_closest, grid_get_grid_data, grid_get_item_theme_data, grid_get_grid_current_theme
-from .spawn import grid_spawn
-from .comms import comms_broadcast
-from .settings import settings_get_defaults
-from .prefab import prefab_spawn
+from sbs_utils.procedural.query import to_id, to_blob, to_object, to_list, to_set
+from sbs_utils.procedural.roles import role, add_role, remove_role, all_roles,has_role
+from sbs_utils.procedural.links import link,unlink
+from sbs_utils.procedural.inventory import get_inventory_value, set_inventory_value
+from sbs_utils.procedural.grid import grid_objects, grid_objects_at, grid_closest, grid_get_grid_data, grid_get_item_theme_data, grid_get_grid_current_theme
+from sbs_utils.procedural.spawn import grid_spawn
+from sbs_utils.procedural.comms import comms_broadcast
+from sbs_utils.procedural.settings import settings_get_defaults
+from sbs_utils.procedural.prefab import prefab_spawn
 
-from .space_objects import get_pos
-from .signal import signal_emit
-from ..helpers import FrameContext
-from ..agent import Agent
-from ..fs import is_dev_build
+from sbs_utils.procedural.space_objects import get_pos
+from sbs_utils.procedural.signal import signal_emit
+from sbs_utils.helpers import FrameContext
+from sbs_utils.agent import Agent
+from sbs_utils.fs import is_dev_build
 
 import random
 
