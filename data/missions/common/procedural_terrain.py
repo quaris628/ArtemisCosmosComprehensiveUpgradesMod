@@ -13,6 +13,8 @@ from sbs_utils.procedural.prefab import prefab_spawn
 
 import math
 
+from data.missions.common.station_type_abbreviations import get_station_type_abbrev
+
 NEB_MAX_SIZE = 1500
 NEB_SIZE_LARGE = 1500
 NEB_SIZE_SMALL = 1200
@@ -138,8 +140,15 @@ def terrain_spawn_stations(DIFFICULTY, lethal_value, x_min=-32500, x_max=32500, 
         #    _spawned_pos.append(pos)
             startZ += station_step
         #make the station ----------------------------------
-        name = f"DS {index+1}"
-        s_roles = f"tsn, station"
+        # vvv vanilla vvv
+        #name = f"DS {index+1}"
+        #s_roles = f"tsn, station"
+        # ^^^ vanilla ^^^
+        # vvv mod vvv
+        name = f"{get_station_type_abbrev(stat_type)} DS {index+1}"
+        # peacetime code assumes "ds1" role is present on DS 1
+        s_roles = f"tsn, station, DS{index + 1}"
+        # ^^^ mod ^^^
         station_object = npc_spawn(*pos, name, s_roles, stat_type, "behav_station")
         so = to_space_object(station_object)
         if so is not None:

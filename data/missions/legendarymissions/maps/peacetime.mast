@@ -61,23 +61,23 @@ Properties:
     ds_list = []
     for s in to_object_list(role("station")):
         temp_rand = random.randint(1, 3)
-        if s.name == "DS 1":
+        if s.name[-4:] == "DS 1":
             add_role(s.id, "ds1")
             ds_list.append(s.id)
             set_inventory_value(s, "records_status", temp_rand)
-        elif s.name == "DS 2":
+        elif s.name[-4:] == "DS 2":
             add_role(s.id, "ds2")
             ds_list.append(s.id)
             set_inventory_value(s, "records_status", temp_rand)
-        elif s.name == "DS 3":
+        elif s.name[-4:] == "DS 3":
             add_role(s.id, "ds3")
             ds_list.append(s.id)
             set_inventory_value(s, "records_status", temp_rand)
-        elif s.name == "DS 4":
+        elif s.name[-4:] == "DS 4":
             add_role(s.id, "ds4")
             ds_list.append(s.id)
             set_inventory_value(s, "records_status", temp_rand)
-        elif s.name == "DS 5":
+        elif s.name[-4:] == "DS 5":
             add_role(s.id, "ds5")
             ds_list.append(s.id)
             set_inventory_value(s, "records_status", temp_rand)
