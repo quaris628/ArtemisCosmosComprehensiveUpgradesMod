@@ -1,4 +1,5 @@
 import ../../common/library_function_patches.py
+import ../../common/procedural_terrain.py
 # only referenced from mast, so these imports aren't actually necessary,
 # but it might be important to note that the dependency exists
 import ../../common/controller_game_statistics.py
