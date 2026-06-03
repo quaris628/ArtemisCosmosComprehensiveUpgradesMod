@@ -452,7 +452,7 @@ def terrain_spawn_nebula_clusters(terrain_value, center=None, selectable=False, 
     if center is None:
         center = Vec3(0,0,0)
 
-    from ..helpers import FrameContext
+    from sbs_utils.helpers import FrameContext
     
 
     t_min = terrain_value * 6
