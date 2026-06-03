@@ -2,7 +2,7 @@ from sbs_utils.procedural.query import to_id, to_blob, to_object, to_list, to_se
 from sbs_utils.procedural.roles import role, add_role, remove_role, all_roles,has_role
 from sbs_utils.procedural.links import link,unlink
 from sbs_utils.procedural.inventory import get_inventory_value, set_inventory_value
-from sbs_utils.procedural.grid import grid_objects, grid_objects_at, grid_closest, grid_get_grid_data, grid_get_item_theme_data, grid_get_grid_current_theme
+from sbs_utils.procedural.grid import grid_objects, grid_objects_at, grid_closest, grid_get_grid_data, grid_get_item_theme_data, grid_get_grid_current_theme, grid_pos_data
 from sbs_utils.procedural.spawn import grid_spawn
 from sbs_utils.procedural.comms import comms_broadcast
 from sbs_utils.procedural.settings import settings_get_defaults
@@ -208,6 +208,32 @@ def grid_restore_damcons(id_or_obj):
     # 
     colors  = item_theme_data.color
     damage_colors  = item_theme_data.damage_color
+    
+    # vvv mod addition vvv
+    #
+    # Get spawn locations
+    #
+    quarters_grid_object_ids = list(grid_objects(ship_id) & all_roles("room,cabin,quarters"))
+    mess_hall_grid_object_ids = list(grid_objects(ship_id) & all_roles("room,cabin,mess"))
+    gym_grid_object_ids = list(grid_objects(ship_id) & all_roles("room,cabin,gym"))
+    all_room_grid_object_ids = quarters_grid_object_ids + mess_hall_grid_object_ids + gym_grid_object_ids
+    
+    spawn_points = []
+    for room_grid_object_ids in [quarters_grid_object_ids, mess_hall_grid_object_ids, gym_grid_object_ids]:
+        if len(room_grid_object_ids) > 0:
+            spawn_points.append(grid_pos_data(random.choice(room_grid_object_ids)))
+        elif len(all_room_grid_object_ids) > 0:
+            # this might cause two damcons to spawn on the same grid space, but that's fine
+            spawn_points.append(grid_pos_data(random.choice(all_room_grid_object_ids)))
+        else:
+            v = SBS.vec3(0.5,0,0.5)
+            point = SBS.find_valid_unoccupied_grid_point_for_vector3(ship_id, v, 5)
+            # Allow it to spawn somewhere
+            if len(point) == 0:
+                point = SBS.find_valid_grid_point_for_vector3(ship_id, v, 5)
+            spawn_points.append(point)
+    # ^^^ mod addition ^^^
+    
     #
     #TODO: REMOVE When Grid AI is proven
     settings = settings_get_defaults()
@@ -230,14 +256,19 @@ def grid_restore_damcons(id_or_obj):
             hp = grid_get_max_hp()
             grid_set_hp(ship_id, _id, hp)
         else:
-            v = SBS.vec3(0.5,0,0.5)
-            point = SBS.find_valid_unoccupied_grid_point_for_vector3(ship_id, v, 5)
-            # Allow it to spawn somewhere
-            if len(point) == 0:
-                point = SBS.find_valid_grid_point_for_vector3(ship_id, v, 5)
-                
+            # vvv vanilla vvv
+            # v = SBS.vec3(0.5,0,0.5)
+            # point = SBS.find_valid_unoccupied_grid_point_for_vector3(ship_id, v, 5)
+            # # Allow it to spawn somewhere
+            # if len(point) == 0:
+               # point = SBS.find_valid_grid_point_for_vector3(ship_id, v, 5)
+            # ^^^ vanilla ^^^
+            # vvv mod vvv
+            point = spawn_points[i]
+            # ^^^ mod ^^^
             if len(point) == 0:
                 break
+            
             icon = item_theme_data.icon
             scale = item_theme_data.scale
 
