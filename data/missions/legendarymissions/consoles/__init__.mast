@@ -2,6 +2,7 @@ import ../../common/q_logger.py
 import ../../common/library_function_patches.py
 import ../../common/common_signals.py
 import ../../common/repair_levels_display.py
+import ../../common/ordinance_conversion.py
 
 #import ../game_setup/console_code_helpers.py
 

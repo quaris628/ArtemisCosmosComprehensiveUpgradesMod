@@ -151,6 +151,15 @@ shared COMMS_PROTOTYPE  = SETTINGS.get("COMMS_PROTOTYPE", False)
         gui_row("row-height: 400px;")
         gui_info_panel(tab=tab)
         gui_info_panel_add("message", 83, gui_panel_console_message,None, gui_panel_console_message_tick)
+    
+    player_ship_id = sbs.get_ship_of_client(client_id)
+    gui_section(style="area:30px,445px,280px,500px")
+    on gui_message(gui_button("150 energy\nto Homing")):
+        manufacture(player_ship_id, ordinance_type_homing())
+    on gui_message(gui_button("Homing to\n100 energy")):
+        to_energy(player_ship_id, ordinance_type_homing())
+    
+    yield idle
 
 //gui/normal_main
     default tab = 1
