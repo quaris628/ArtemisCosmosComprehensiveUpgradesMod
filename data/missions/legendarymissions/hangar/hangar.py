@@ -3,7 +3,7 @@ from random import randint
 from sbs_utils.procedural.spawn import player_spawn
 from sbs_utils.procedural.query import set_science_selection, to_space_object, to_id, object_exists, to_data_set, to_space_object_list
 from sbs_utils.procedural.links import link, unlink, get_dedicated_link, set_dedicated_link, linked_to, has_link
-from sbs_utils.procedural.roles import has_role, remove_role, any_role, role, all_roles
+from sbs_utils.procedural.roles import has_role, remove_role, any_role, role, all_roles, has_any_role
 from sbs_utils.procedural.space_objects import broad_test_around, closest, get_pos, set_pos
 from sbs_utils.procedural.routes import RouteDamageDestroy
 from sbs_utils.procedural.sides import to_side_object
@@ -345,12 +345,14 @@ def hangar_attempt_dock_craft(craft_id, dock_rng = 600):
 
     # None mean dock anywhere
     if dock_rng is None:
-        dock_target = closest(craft_id, role("tsn") & any_role("station, __player__"))
+        dockable = hangar_get_valid_dock_ids(craft_id)
+        dock_target = closest(craft_id, dockable)
     elif home_id is not None and sbs.distance_id(craft.id, home_id) < dock_rng:
         dock_target = home_id
     else:
         dockable = broad_test_around(craft.id, dock_rng, dock_rng, 0xF0)
-        dock_target = closest(craft_id, dockable & role("tsn") & any_role("station, __player__"))
+        dockable = hangar_filter_valid_dock_ids(craft.id, dockable)
+        dock_target = closest(craft_id, dockable)
 
     if dock_target is None: return False
     hangar_bump_version()
@@ -438,25 +440,59 @@ def hangar_get_call_signs():
     Tapper
     Whiskers"""
 
-    
-
-
-def hangar_get_docks(side):
+def is_potential_valid_dock(space_object_id):
     """
-    Get a list of all stations and ships that have a hangar.
+    Returns False if it's certain that no player single-seat craft will ever
+    be able to dock at the given space object (includes if that object is
+    destroyed).
+    Otherwise (if they can dock or it's unclear whether they can), returns True.
+    """
+    # The only harm in returning True for something that won't be docked at
+    # is worse performance of doing slightly more precise calculations to
+    # determine the docking privileges for a specific craft.
+    # But if this returns False for something that should allow docking,
+    # then this creates a functional problem of incorrectly disallowing docking.
+    # So if uncertain, you should err on the side of returning True.
+    space_object = to_space_object(space_object_id)
+    return space_object is not None and has_any_role(space_object_id, "__player__,station")
+
+# returns a set of space object ids
+def hangar_get_valid_dock_ids(craft_ship_id):
+    """
+    Gets all locations that a player-piloted single-seat craft can dock at.
+    If the single-seat craft is destroyed, returns an empty set.
     Args:
-        side (str): The side of the craft (currently unused)
+        craft_ship_id (int): id of a player-piloted single-seat craft
     Returns:
-        list[int]: A list of the IDs of all ships and stations with a hangar.
+        set[int]: set of all space object ids that can be docked at
     """
-    docks = has_link("hangar_craft")
-    # crafts = all_roles(f"cockpit,standby,{side}")
-    # docks = set()
-    # for c in crafts:
-    #     dock = get_science_selection(c)
-    #     if dock is not None:
-    #         docks.add(dock)
-    return to_space_object_list(docks)
+    return hangar_filter_valid_dock_ids(craft_ship_id, any_role("__player__, station"))
+
+# space_object_ids can be any iterable
+# returns a set of space object ids
+def hangar_filter_valid_dock_ids(craft_ship_id, space_object_ids):
+    """
+    Given multiple space object ids, returns which of those space objects
+    that a player-piloted single-seat craft can dock at.
+    If the single-seat craft is destroyed, returns an empty set.
+    Args:
+        craft_ship_id (int): id of a player-piloted single-seat craft
+        space_object_ids (any iterable[int]): ids of any space objects
+    Returns:
+        set[int]: set of space object ids that can be docked at
+    """
+    if craft_ship_id is None:
+        return {}
+    craft_ship_object = to_space_object(craft_ship_id)
+    if craft_ship_object is None:
+        return {}
+    
+    dockable_ids = set()
+    for dock_id in space_object_ids:
+        if is_potential_valid_dock(dock_id) and has_role(dock_id, craft_ship_object.side):
+            dockable_ids.add(dock_id)
+    
+    return dockable_ids
 
 def hangar_get_crafts_at(dock_id):
     """
