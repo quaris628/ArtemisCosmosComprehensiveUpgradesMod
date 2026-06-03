@@ -14,6 +14,7 @@ import manual_weapons.mast
 #import server_console.py
 #import server_console.mast
 
+import ../engineering/energy_management_controls.py
 import layout_widgets.py
 import layout_widgets.mast
 

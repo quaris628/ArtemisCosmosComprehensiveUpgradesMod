@@ -81,8 +81,35 @@ shared COMMS_PROTOTYPE  = SETTINGS.get("COMMS_PROTOTYPE", False)
         gui_info_panel_add("message", 83, gui_panel_console_message,None, gui_panel_console_message_tick)
     
     total_vertical_split_x = "51"
+    right_side_horizontal_split_y = "31"
     player_ship_id = sbs.get_ship_of_client(client_id)
-
+    
+    # Energy management controls
+    
+    is_energy_auto_mode_on = get_inventory_value(player_ship_id, inventory_key_is_switch_on(switch_identifier_auto_mode()))
+    are_resistor_coils_on = get_inventory_value(player_ship_id, inventory_key_is_switch_on(switch_identifier_warp_resistor_coils()))
+    is_apu_on = get_inventory_value(player_ship_id, inventory_key_is_switch_on(switch_identifier_apu()))
+    
+    gui_section(style=f"area:100-150px,{right_side_horizontal_split_y},100,{right_side_horizontal_split_y}+55px;")
+    energy_auto_mode_checkbox = gui_checkbox("Auto Energy Management", var="is_energy_auto_mode_on")
+    
+    gui_section(style=f"area:100-150px,{right_side_horizontal_split_y}+65px,100,{right_side_horizontal_split_y}+120px;")
+    resistor_coils_checkbox = gui_checkbox("Warp Resistor Coils", var="are_resistor_coils_on")
+    
+    gui_section(style=f"area:100-150px,{right_side_horizontal_split_y}+120px,100,{right_side_horizontal_split_y}+150px;")
+    apu_checkbox = gui_checkbox("APU", var="is_apu_on")
+    
+    on gui_message(energy_auto_mode_checkbox):
+        if is_energy_auto_mode_on:
+            manual_set_auto_mode(player_ship_id)
+        else:
+            manual_set_manual_mode(player_ship_id)
+    on gui_message(resistor_coils_checkbox):
+        set_switch_state(player_ship_id, switch_identifier_warp_resistor_coils(), are_resistor_coils_on, False)
+    on gui_message(apu_checkbox):
+        set_switch_state(player_ship_id, switch_identifier_apu(), is_apu_on, False)
+    signal_register("non_manual_change_energy_management_controls_checkbox", non_manual_change_energy_management_controls_checkbox)
+    
     # % system repair numbers
     
     gui_section(style=f"tag:repair-levels-title-section;area: 0,100-45px,120px,100-25px;background:#1572;")
@@ -133,6 +160,21 @@ shared COMMS_PROTOTYPE  = SETTINGS.get("COMMS_PROTOTYPE", False)
     text.background_color = BACKGROUND_COLOR
     gui_represent(text)
     ->END
+
+# This needs to be triggered via the signal_emit;
+# Otherwise the checkbox gui objects will not be in scope.
+# Needs data={SWITCH_IDENTIFIER, ON} params
+===== non_manual_change_energy_management_controls_checkbox =====
+    match SWITCH_IDENTIFIER:
+        case switch_identifier_auto_mode():
+            energy_auto_mode_checkbox.value = ON
+            gui_represent(energy_auto_mode_checkbox)
+        case switch_identifier_warp_resistor_coils():
+            resistor_coils_checkbox.value = ON
+            gui_represent(resistor_coils_checkbox)
+        case switch_identifier_apu():
+            apu_checkbox.value = ON
+            gui_represent(apu_checkbox)
 
 //gui/normal_helm
     default tab = 1

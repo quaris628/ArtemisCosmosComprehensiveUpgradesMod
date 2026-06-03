@@ -1,0 +1,21 @@
+import energy_management_controls.py
+
+//shared/signal/game_started
+    for player_ship_id in role("__player__"):
+        initialize_energy_management_controls(player_ship_id)
+
+===== auto_activate_warp_resistor_coils =====
+    set_switch_state(PLAYER_SHIP_ID, switch_identifier_warp_resistor_coils(), True, True)
+    ->END
+
+===== auto_deactivate_warp_resistor_coils =====
+    set_switch_state(PLAYER_SHIP_ID, switch_identifier_warp_resistor_coils(), False, True)
+    ->END
+
+===== auto_activate_apu =====
+    set_switch_state(PLAYER_SHIP_ID, switch_identifier_apu(), True, True)
+    ->END
+
+===== auto_deactivate_apu =====
+    set_switch_state(PLAYER_SHIP_ID, switch_identifier_apu(), False, True)
+    ->END

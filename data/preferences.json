@@ -103,7 +103,7 @@
   "energyCostOfOneBeamShot": 1.0,
 
   "ship_apu_assistance_per_tick": 0.1,
-  "ship_apu_assistance_ceiling": 200,
+  "ship_apu_assistance_ceiling": 999999999999,
 
   //"energy_to_torp_cost": 150.0,   deprecated
   //"torp_to_energy_cost": 100.0,   deprecated
