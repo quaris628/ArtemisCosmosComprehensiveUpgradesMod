@@ -51,6 +51,12 @@ signal_register(signal_after_player_ship_destroyed(), watch_for_game_end_after_p
 //damage/destroy if is_end_if_no_enemies_enabled() and is_enemy(DESTROYED_ID)
     enemy_ids = get_all_enemy_ids(except_enemy_id=DESTROYED_ID)
     if len(enemy_ids) == 0:
+        # Somehow we need to allow other code that triggers
+        # on //damage/destroy to run before ending the game.
+        # Otherwise, the enemies defeated count will be wrong (for example).
+        # This await delay_app(0) doesn't seem ideal, but
+        # I don't know of another feasible way.
+        await delay_app(0)
         jump watch_for_game_end_end_bc_no_enemies
     ->END
 
