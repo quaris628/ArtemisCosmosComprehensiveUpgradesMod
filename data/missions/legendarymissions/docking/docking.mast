@@ -172,6 +172,14 @@ distance: 600
             count = min(len(system_grid_objects), interior_count)
             grid_repair_grid_objects(player_id, system_grid_objects[:count])
             
+            # check which system needs displayed repair % updated
+            # (assume player_id is a capital player ship; not a fighter, npc, etc)
+            updated_system_roles_set = set()
+            for grid_object_id in system_grid_objects[:count]:
+                if has_role(grid_object_id, "__undamaged__"):
+                    updated_system_roles_set.add(get_system_roles(grid_object_id))
+            if 0 < len(updated_system_roles_set):
+                update_systems_repair_level(player_id, systems_filter=updated_system_roles_set)
         else:
             #
             # Repair hallways and non system rooms

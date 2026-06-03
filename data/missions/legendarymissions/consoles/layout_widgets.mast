@@ -1,6 +1,7 @@
 default shared SETTINGS = settings_get_defaults()
 shared COMMS_PROTOTYPE  = SETTINGS.get("COMMS_PROTOTYPE", False)
 
+
 #=== layout_comms_engine_widgets
 //gui/normal_comm
 
@@ -162,8 +163,58 @@ shared COMMS_PROTOTYPE  = SETTINGS.get("COMMS_PROTOTYPE", False)
         gui_info_panel(tab=tab)
         gui_info_panel_add("message", 83, gui_panel_console_message,None, gui_panel_console_message_tick)
     
+    total_vertical_split_x = "51"
+    player_ship_id = sbs.get_ship_of_client(client_id)
+
+    # % system repair numbers
+    
+    gui_section(style=f"tag:repair-levels-title-section;area: 0,100-45px,120px,100-25px;background:#1572;")
+    gui_text("Repair Levels:", style=f"tag:repair-levels-title;font:gui-1;justify:center;color:#bbb;")
+    
+    gui_section(style=f"area: 0,100-26px,{total_vertical_split_x}-20px,100-25px;background:#bbb;")
+    gui_text("")
+    
+    gui_section(style=f"area: 0-5px,100-25px,{total_vertical_split_x}-20px,100;font:gui-1;justify:center")
+    initial_text = "-"
+    system_texts_dict = ~~{
+        system_roles_beams(): gui_text(initial_text),
+        system_roles_torpedoes(): gui_text(initial_text),
+        system_roles_impulse(): gui_text(initial_text),
+        system_roles_special_warp_and_jump(): gui_text(initial_text),
+        system_roles_maneuver(): gui_text(initial_text),
+        system_roles_sensors(): gui_text(initial_text),
+        system_roles_front_shield(): gui_text(initial_text),
+        system_roles_rear_shield(): gui_text(initial_text),
+    }~~
+    
+    # Must be passed vars SYSTEM_ROLES, TEXT, BACKGROUND_COLOR
+    signal_register("update_repair_level_text_on_ship_" + str(player_ship_id), update_repair_level_text)
+    
+    # This thread must release control to the engine for a moment
+    # before gui updates can be correctly registered and displayed.
+    # Any await inside this //gui/ block causes crashes.
+    # So schedule a separate task.
+    task_schedule(update_repair_levels, data={"PLAYER_SHIP_ID": player_ship_id})
+    
     yield idle
 
+== update_repair_levels ==
+    update_systems_repair_level(PLAYER_SHIP_ID)
+    ->END
+
+# Assumes system_texts_dict, PLAYER_SHIP_ID, SYSTEM_ROLES, TEXT, BACKGROUND_COLOR
+== update_repair_level_text ==
+    # Matching to the correct player ship is already vetted
+    # by the name of the signal that triggers this
+    if SYSTEM_ROLES not in system_texts_dict:
+        ->END
+    text = system_texts_dict[SYSTEM_ROLES]
+    text.value = TEXT
+    # background_color still has bugs; it doesn't change unless the sim pauses once
+    # So disable until more vanilla fixes come
+    #text.background_color = BACKGROUND_COLOR
+    gui_represent(text)
+    ->END
 
 //gui/normal_helm
     default tab = 1

@@ -853,11 +853,11 @@ eng_power_controls
 1
 65
 51
-100
+97
 1
 65
 51
-100
+97
 normal_engi
 eng_presets
 1

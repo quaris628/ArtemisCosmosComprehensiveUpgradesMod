@@ -143,6 +143,15 @@ default shared grid_data = grid_get_grid_data()
     #
     at_point = hm.get_objects_at_point(x,y)
     grid_repair_grid_objects(obj.host_id, at_point, SPAWNED_ID)
+    # Hallway fires are considered a grid object
+    # and they can get removed by the above function,
+    # which makes the at_point list get out-of-date.
+    at_point = hm.get_objects_at_point(x, y)
+    # (assume player_id is a capital player ship; not a fighter, npc, etc)
+    for grid_object_id in at_point:
+        if grid_object_id == SPAWNED_ID:
+            continue
+        update_repair_level_single_node(obj.host_id, grid_object_id)
 
     # I'm done with this guy
     set_inventory_value(SPAWNED_ID, "target_room", None )

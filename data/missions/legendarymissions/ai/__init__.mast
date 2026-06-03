@@ -1,3 +1,4 @@
+import ../../common/repair_levels_display.py
 import grid_ai.mast
 import npc_brains.mast
 import grid_brains.mast
