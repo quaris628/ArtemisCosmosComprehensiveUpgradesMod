@@ -16,7 +16,7 @@ from gui_help_button import create_help_button
 from gui_library_button import create_library_button
 
 @label()
-def prepare_console(console_identifier, rerun_label=None, widget_list=None, enable_helm_jump_drive_controls=False):
+def prepare_console(console_identifier, rerun_label=None, widget_list=None, enable_helm_jump_drive_controls=False, parent_console_identifier=None, skip_ship_assignment=False):
     """
     
     Returns:
@@ -32,10 +32,15 @@ def prepare_console(console_identifier, rerun_label=None, widget_list=None, enab
     if not ensure_on_gui_task(rerun_label):
         return False
     
+    if parent_console_identifier is None:
+        top_tab_console_identifier = console_identifier
+    else:
+        top_tab_console_identifier = parent_console_identifier
+    
     all_top_tabs = [GuiTopTab(console_slot.identifier, console_slot.display_name, console_slot.label) for console_slot in GAME_SETUP_DATA.get_all_console_slots_selected_by_client(client_id)]
     if game_setup_assigned_ship is not None and game_setup_assigned_ship.is_at_least_one_console_selected_by_client(client_id):
         all_top_tabs.append(GuiTopTab(gui_top_tab_upgrades_key(), "Upgrades", "upgrade_screen"))
-    gui_create_top_tabs(console_identifier, all_top_tabs, x_right="100-72px")
+    gui_create_top_tabs(top_tab_console_identifier, all_top_tabs, x_right="100-72px")
     if is_gui_top_tabs_enabled(client_id):
         create_library_button(rerun_label, section_style="area:100-72px,0,100-36px,36px;")
         create_help_button(rerun_label)
@@ -43,14 +48,14 @@ def prepare_console(console_identifier, rerun_label=None, widget_list=None, enab
     # Sometimes consoles change the engine's client-ship assignments
     # (e.g. gamemaster, flight hangar)
     # So always reset the engine's assignment to the player ship picked in console selection
-    if game_setup_assigned_ship is not None:
+    if game_setup_assigned_ship is not None and not skip_ship_assignment:
         engine_assigned_ship_id = sbs.get_ship_of_client(client_id)
         if engine_assigned_ship_id != game_setup_assigned_ship.spawned_ship_id:
             sbs.assign_client_to_ship(client_id, game_setup_assigned_ship.spawned_ship_id)
             unlink(engine_assigned_ship_id, "consoles", client_id)
         link(game_setup_assigned_ship.spawned_ship_id, "consoles", client_id)
     
-    # This is read from in the upgrade tab and some gamemaster comms stuff
+    # This is read from some gamemaster comms stuff and (supposedly) by the engine
     # I believe it should be set to the currently-open screen on the client
     set_inventory_value(client_id, "CONSOLE_TYPE", console_identifier)
     
