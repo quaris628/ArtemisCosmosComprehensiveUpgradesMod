@@ -83,6 +83,7 @@ class ConsoleSlot:
         else:
             self._client_ids.remove(client_id)
         signal_emit(signal_console_slot_deselect_or_select(client_id), {"SHIP_NUMBER": self._ship_number, "CONSOLE_SLOT": self, "IS_SELECT": False})
+        signal_emit(signal_console_slot_deselect(client_id, self.identifier), {"SHIP_NUMBER": self._ship_number, "CONSOLE_SLOT": self})
     
     # sorting operator overloads
     
@@ -107,3 +108,5 @@ def signal_console_slot_is_exclusively_taken_changed():
     return "cs_is_exclusively_taken_changed"
 def signal_console_slot_deselect_or_select(client_id):
     return f"cs_deselect_or_select_{client_id}"
+def signal_console_slot_deselect(client_id, console_identifier):
+    return f"cs_deselect_or_select_{client_id}_{console_identifier}"
