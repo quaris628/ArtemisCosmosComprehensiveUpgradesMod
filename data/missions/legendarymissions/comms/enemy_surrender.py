@@ -114,6 +114,9 @@ def _set_surrendered(ship_object, player_ship_object, via_code_case=False):
     
     GAME_STATISTICS = get_game_statistics()
     GAME_STATISTICS.record_vessel_surrendered(COMMS_SELECTED)
+    
+    # Hide beam arcs on 2d maps
+    ship_object.data_set.set("beamCount", 0)
 
 # ----- Enemy npc conditions for surrendering -----
 
