@@ -73,13 +73,13 @@ GAMEMASTER:
 # for standard docking
 #    
 DOCKING: 
-    refuel_amount: 20
-    refuel_delay: 2
-    shield_delay: 2
-    shield_coeff: 2
-    torps_delay: 6
-    interior_delay: 2
-    interior_count: 2
+    refuel_amount: 100
+    refuel_delay: 1
+    shield_delay: 1
+    shield_coeff: 1
+    torps_delay: 2
+    interior_delay: 1
+    interior_count: 1
 
 # These control what the mainscreen shows when the game starts
 # Valid options for view: "3d_view", "lrs", "tactical", "data"
