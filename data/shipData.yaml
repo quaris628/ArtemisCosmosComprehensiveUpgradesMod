@@ -17,6 +17,249 @@
   #------------------------------------------------------------------
   "#ship-list": [
     {
+      #---------------------------------- ship data --------------------------------
+      "key": "pirate_shuttle_ef",
+      "name": "Adventure",
+      "origin": "Pirate",
+      "side": "Pirate",
+      "artfileroot": "pirate_fighter",
+      "meshscale": 0.025000000372529,
+      "radarscale": 1.0,
+      "exclusionradius": 25.0,
+      "meshrotate": 0,
+      "long_desc": "Shuttle of the pirate fleet.^1 weak forward beam^Shields 30 front, 30 rear",
+      "tubecount": 0,
+      "torpedostart": [
+        {
+          "Homing": 0
+        },
+        {
+          "Nuke": 0
+        },
+        {
+          "EMP": 0
+        },
+        {
+          "Mine": 0
+        }
+      ],
+      #     "torpedostart": {"Homing": 0, "Nuke": 0, "EMP": 0, "Mine": 0 },
+      "internalmapscale": 1.0,
+      "internalmapw": 9,
+      "internalmaph": 8,
+      "internalsymmetry": 1,
+      "turn_rate": 4,
+      "speed_coeff": 1.5,
+      "scan_strength_coeff": 0.75,
+      "ship_energy_cost": 1,
+      "warp_energy_cost": 1,
+      "jump_energy_cost": 1,
+      "roles": "cockpit,shuttle,pirate",
+      "shields": [
+        15,
+        15
+      ],
+      "hullpoints": 1,
+      "hull_port_sets": {
+        "beam Primary Beams": [
+          {
+            "position": [
+              0.0,
+              0.0,
+              340.0
+            ],
+            "color": "#67228f",
+            "arccolor": "#00ff94",
+            "cycle_time": 2.0,
+            "damage_coeff": 0.5,
+            "range": 1000,
+            "arcwidth": 36,
+            "barrel_angle": 0
+          }
+        ],
+        "exhaust": [
+          {
+            "position": [
+              -37.209,
+              15.486,
+              -20.812
+            ],
+            "color": "#1b5701"
+          },
+          {
+            "position": [
+              37.209,
+              15.486,
+              -20.812
+            ],
+            "color": "#1b5701"
+          }
+        ]
+      }
+    },
+    {
+      #---------------------------------- ship data --------------------------------
+      "key": "pirate_fighter_ef",
+      "name": "Dart",
+      "origin": "Pirate",
+      "side": "Pirate",
+      "artfileroot": "pirate_fighter",
+      "meshscale": 0.025000000372529,
+      "radarscale": 1.0,
+      "exclusionradius": 25.0,
+      "meshrotate": 0,
+      "long_desc": "Fighter of the pirate fleet.^1 fast-firing forward beam^Stores for 3 homings^Shields 20 front, 20 rear",
+      "tubecount": 1,
+      "torpedostart": [
+        {
+          "Homing": 4
+        },
+        {
+          "Nuke": 0
+        },
+        {
+          "EMP": 0
+        },
+        {
+          "Mine": 0
+        }
+      ],
+      #      "torpedostart": {"Homing": 5, "Nuke": 0, "EMP": 0, "Mine": 0 },
+      "internalmapscale": 1.0,
+      "internalmapw": 9,
+      "internalmaph": 8,
+      "internalsymmetry": 1,
+      "turn_rate": 6.0,
+      "speed_coeff": 2.0,
+      "scan_strength_coeff": 0.5,
+      "ship_energy_cost": 1,
+      "warp_energy_cost": 1,
+      "jump_energy_cost": 1,
+      "roles": "cockpit,fighter,pirate",
+      "shields": [
+        20,
+        20
+      ],
+      "hullpoints": 1,
+      "hull_port_sets": {
+        "beam Primary Beams": [
+          {
+            "position": [
+              0.0,
+              0.0,
+              340.0
+            ],
+            "color": "#67228f",
+            "arccolor": "#00ffaa",
+            "cycle_time": 0.5,
+            "damage_coeff": 1.0,
+            "range": 1100,
+            "arcwidth": 72,
+            "barrel_angle": 0
+          }
+        ],
+        "exhaust": [
+          {
+            "position": [
+              -37.209,
+              15.486,
+              -20.812
+            ],
+            "color": "#1b5701"
+          },
+          {
+            "position": [
+              37.209,
+              15.486,
+              -20.812
+            ],
+            "color": "#1b5701"
+          }
+        ]
+      }
+    },
+    {
+      #---------------------------------- ship data --------------------------------
+      "key": "pirate_bomber_ef",
+      "name": "Corsair",
+      "origin": "Pirate",
+      "side": "Pirate",
+      "artfileroot": "pirate_fighter",
+      "meshscale": 0.025000000372529,
+      "radarscale": 1.0,
+      "exclusionradius": 25.0,
+      "meshrotate": 0,
+      "long_desc": "Bomber of the pirate fleet.^1 forward beam^Stores for 8 homings^Shields 25 front, 20 rear",
+      "tubecount": 1,
+      "torpedostart": [
+        {
+          "Homing": 8
+        },
+        {
+          "Nuke": 0
+        },
+        {
+          "EMP": 0
+        },
+        {
+          "Mine": 4
+        }
+      ],
+      #     "torpedostart": {"Homing": 8, "Nuke": 0, "EMP": 0, "Mine": 0 },
+      "internalmapscale": 1.0,
+      "internalmapw": 9,
+      "internalmaph": 8,
+      "internalsymmetry": 1,
+      "turn_rate": 5,
+      "speed_coeff": 1.75,
+      "scan_strength_coeff": 0.5,
+      "ship_energy_cost": 1,
+      "warp_energy_cost": 1,
+      "jump_energy_cost": 1,
+      "roles": "cockpit,fighter,bomber,pirate",
+      "shields": [
+        25,
+        20
+      ],
+      "hullpoints": 1,
+      "hull_port_sets": {
+        "beam Primary Beams": [
+          {
+            "position": [
+              0.0,
+              0.0,
+              340.0
+            ],
+            "color": "#67228f",
+            "arccolor": "#e900ff",
+            "cycle_time": 2.0,
+            "damage_coeff": 1.5,
+            "range": 1100,
+            "arcwidth": 72,
+            "barrel_angle": 0
+          }
+        ],
+        "exhaust": [
+          {
+            "position": [
+              -37.209,
+              15.486,
+              -20.812
+            ],
+            "color": "#1b5701"
+          },
+          {
+            "position": [
+              37.209,
+              15.486,
+              -20.812
+            ],
+            "color": "#1b5701"
+          }
+        ]
+      }
+    },
+    {
       #---------------------------------- data for default 3d data (if other data not found) --------------------------------
       "key": "unknown",
       "name": "unknown",

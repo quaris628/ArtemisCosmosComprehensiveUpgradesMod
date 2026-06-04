@@ -1,4 +1,81 @@
 {
+"pirate_shuttle_ef":
+ {"grid_objects": [
+   {"x": 4.0,"y": 0.0,"name": "beam","scale": 1.0,"roles": "system,weapon,beam"},
+   
+   {"x": 3.0,"y": 3.0,"name": "impulse","scale": 1.0,"roles": "system,engine,impulse"},
+   {"x": 5.0,"y": 3.0,"name": "impulse","scale": 1.0,"roles": "system,engine,impulse"},
+   
+   {"x": 2.0,"y": 2.0,"name": "sensors","scale": 1.0,"roles": "system,sensor"},
+   {"x": 6.0,"y": 2.0,"name": "sensors","scale": 1.0,"roles": "system,sensor"},
+   
+   {"x": 1.0,"y": 2.0,"name": "maneuvering","scale": 1.0,"roles": "system,engine,maneuver"},
+   {"x": 7.0,"y": 2.0,"name": "maneuvering","scale": 1.0,"roles": "system,engine,maneuver"},
+   
+   {"x": 3.0,"y": 0.0,"name": "front-shield","scale": 1.2,"roles": "system,shield,fwd"},
+   {"x": 5.0,"y": 0.0,"name": "front-shield","scale": 1.2,"roles": "system,shield,fwd"},
+   
+   {"x": 3.0,"y": 2.0,"name": "rear-shield","scale": 1.2,"roles": "system,shield,aft"},
+   {"x": 5.0,"y": 2.0,"name": "rear-shield","scale": 1.2,"roles": "system,shield,aft"},
+   
+   {"x": 3.0,"y": 1.0,"name": "cargo","scale": 1.0,"roles": "room,bay,cargo"},
+   {"x": 4.0,"y": 1.0,"name": "cargo","scale": 1.0,"roles": "room,bay,cargo"},
+   {"x": 5.0,"y": 1.0,"name": "cargo","scale": 1.0,"roles": "room,bay,cargo"},
+   
+   {"x": 4.0,"y": 2.0,"name": "computer","scale": 1.2,"roles": "room,computer"}
+  ]},
+"pirate_fighter_ef":
+ {"grid_objects": [
+   {"x": 4.0,"y": 0.0,"name": "beam","scale": 1.0,"roles": "system,weapon,beam"},
+   
+   {"x": 4.0,"y": 1.0,"name": "torpedo-tube","scale": 1.0,"roles": "system,weapon,torpedo"},
+   
+   {"x": 3.0,"y": 3.0,"name": "impulse","scale": 1.0,"roles": "system,engine,impulse"},
+   {"x": 5.0,"y": 3.0,"name": "impulse","scale": 1.0,"roles": "system,engine,impulse"},
+   
+   {"x": 2.0,"y": 2.0,"name": "sensors","scale": 1.0,"roles": "system,sensor"},
+   {"x": 6.0,"y": 2.0,"name": "sensors","scale": 1.0,"roles": "system,sensor"},
+   
+   {"x": 1.0,"y": 2.0,"name": "maneuvering","scale": 1.0,"roles": "system,engine,maneuver"},
+   {"x": 7.0,"y": 2.0,"name": "maneuvering","scale": 1.0,"roles": "system,engine,maneuver"},
+   
+   {"x": 3.0,"y": 0.0,"name": "front-shield","scale": 1.2,"roles": "system,shield,fwd"},
+   {"x": 5.0,"y": 0.0,"name": "front-shield","scale": 1.2,"roles": "system,shield,fwd"},
+   
+   {"x": 3.0,"y": 2.0,"name": "rear-shield","scale": 1.2,"roles": "system,shield,aft"},
+   {"x": 5.0,"y": 2.0,"name": "rear-shield","scale": 1.2,"roles": "system,shield,aft"},
+   
+   {"x": 3.0,"y": 1.0,"name": "cargo","scale": 1.0,"roles": "room,bay,cargo"},
+   {"x": 5.0,"y": 1.0,"name": "cargo","scale": 1.0,"roles": "room,bay,cargo"},
+   
+   {"x": 4.0,"y": 2.0,"name": "computer","scale": 1.2,"roles": "room,computer"}
+  ]},
+"pirate_bomber_ef":
+ {"grid_objects": [
+   {"x": 4.0,"y": 0.0,"name": "beam","scale": 1.0,"roles": "system,weapon,beam"},
+   
+   {"x": 3.0,"y": 1.0,"name": "torpedo-tube","scale": 1.0,"roles": "system,weapon,torpedo"},
+   {"x": 5.0,"y": 1.0,"name": "torpedo-tube","scale": 1.0,"roles": "system,weapon,torpedo"},
+   
+   {"x": 3.0,"y": 3.0,"name": "impulse","scale": 1.0,"roles": "system,engine,impulse"},
+   {"x": 5.0,"y": 3.0,"name": "impulse","scale": 1.0,"roles": "system,engine,impulse"},
+   
+   {"x": 2.0,"y": 2.0,"name": "sensors","scale": 1.0,"roles": "system,sensor"},
+   {"x": 6.0,"y": 2.0,"name": "sensors","scale": 1.0,"roles": "system,sensor"},
+   
+   {"x": 1.0,"y": 2.0,"name": "maneuvering","scale": 1.0,"roles": "system,engine,maneuver"},
+   {"x": 7.0,"y": 2.0,"name": "maneuvering","scale": 1.0,"roles": "system,engine,maneuver"},
+   
+   {"x": 3.0,"y": 0.0,"name": "front-shield","scale": 1.2,"roles": "system,shield,fwd"},
+   {"x": 5.0,"y": 0.0,"name": "front-shield","scale": 1.2,"roles": "system,shield,fwd"},
+   
+   {"x": 3.0,"y": 2.0,"name": "rear-shield","scale": 1.2,"roles": "system,shield,aft"},
+   {"x": 5.0,"y": 2.0,"name": "rear-shield","scale": 1.2,"roles": "system,shield,aft"},
+   
+   {"x": 4.0,"y": 1.0,"name": "cargo","scale": 1.0,"roles": "room,bay,cargo"},
+   
+   {"x": 4.0,"y": 2.0,"name": "computer","scale": 1.2,"roles": "room,computer"}
+  ]},
 "tsn_light_cruiser":
  {"grid_objects": [
    {"x": 2.0,"y": 14.0,"name": "WARP","scale": 1.0,"roles": "system,ENGINE,WARP"},

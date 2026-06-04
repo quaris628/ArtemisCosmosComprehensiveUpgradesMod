@@ -16,11 +16,11 @@ ximni:
     roles: shuttle
 
 pirate:
-  - key: pirate_fighter
+  - key: pirate_fighter_ef
     roles: fighter
-  - key: pirate_fighter
+  - key: pirate_bomber_ef
     roles: bomber
-  - key: tsn_shuttle
+  - key: pirate_shuttle_ef
     roles: shuttle
 
 arvonian:
