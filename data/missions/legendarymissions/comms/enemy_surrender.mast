@@ -1,6 +1,4 @@
 
-shared _surrender_return = task_schedule(take_surrendered_home)
-
 //spawn if can_be_asked_to_surrender(SPAWNED_ID)
     # Check has_surrender_conditions_set_up in case override_surrender_conditions
     # was already called (which might happen if it gets called from another //spawn
@@ -66,28 +64,3 @@ shared _surrender_return = task_schedule(take_surrendered_home)
     code_case_attempt_result = attempt_code_case(ship_object, player_ship_object)
     
     yield success
-
-#
-# This is a single task to return surrendered 
-# enemies to their spawn point and remove from map
-#
-======== take_surrendered_home  =========
-
-    await delay_sim(5)
-
-    surrendered = role("surrendered")
-    for ship in surrendered:
-        ship_obj = to_object(ship)
-        continue if ship_obj is None
-
-        spawn_pos = Vec3(ship_obj.spawn_pos)
-        _pos = ship_obj.pos
-        target_pos(ship, spawn_pos.x, spawn_pos.y, spawn_pos.z, throttle=1.5, target_id=0)
-        diff = _pos - spawn_pos
-        continue if diff.length() > 500
-        # if Close to 500, then delete
-        sbs.delete_object(ship)
-
-
-    jump take_surrendered_home
-

@@ -7,6 +7,11 @@ import ../../common/controller_game_statistics.py
 
 import ../consoles/layout_widgets.py
 
+import surrendered_navigation.py
+import surrendered_navigation.mast
+import surrendered_navigation_commands.py
+import surrendered_navigation_commands.mast
+
 import friendly_give_orders.mast
 import station_weapon_building.mast
 import enemy_taunt.mast

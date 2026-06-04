@@ -1,0 +1,92 @@
+# This file is for comms messages and menus that allow interactions between player
+# ships and surrendered ships which are related to the player telling surrendered
+# ships where to go.
+# The effects of these navigation commands are mainly handed by code in
+# surrendered_navigation.py and surrendered_navigation.mast.
+
+//comms if has_any_role(COMMS_ORIGIN_ID, "__player__,admiral") and has_role(COMMS_SELECTED_ID, "surrendered")
+    comms_origin_name = to_object(COMMS_ORIGIN_ID).name
+    
+    + "Hail":
+        if to_object(COMMS_SELECTED_ID) is None:
+            ~~pass~~
+        else:
+            # mast doesn't support multiple return values,
+            # so return a single list of values instead
+            nav_state_return_values = get_hail_message_nav_state_component(COMMS_SELECTED_ID)
+            hail_response_nav_state_component = nav_state_return_values[0]
+            nav_state_special_code = nav_state_return_values[1]
+            if nav_state_special_code == hail_message_nav_state_component_special_run_away():
+                COMMAND_DESCRIPTION = None
+                jump lalala_we_cant_hear_you_response
+            
+            hail_response_message_components = [hail_response_nav_state_component]
+            hail_response_message = "\n".join([message_component for message_component in hail_response_message_components if 0 < len(message_component)])
+            
+            comms_receive(hail_response_message, title="Hail", title_color=surrender_color)
+    
+    + "Hold your position":
+        if to_object(COMMS_SELECTED_ID) is None:
+            ~~pass~~
+        elif command_stop(COMMS_SELECTED_ID, COMMS_ORIGIN_ID):
+            comms_receive("We are cutting our engines and will hold at our current position.", title="Holding position", title_color=surrender_color)
+        else:
+            COMMAND_DESCRIPTION = "hold our position"
+            jump lalala_we_cant_hear_you_response
+    
+    + "Follow {comms_origin_name}":
+        if to_object(COMMS_SELECTED_ID) is None:
+            ~~pass~~
+        elif command_follow_ship(COMMS_SELECTED_ID, COMMS_ORIGIN_ID, COMMS_ORIGIN_ID):
+            comms_receive(f"We will follow you, {comms_origin_name}.", title=f"Following {comms_origin_name}", title_color=surrender_color)
+        else:
+            COMMAND_DESCRIPTION = f"follow {comms_origin_name}"
+            jump lalala_we_cant_hear_you_response
+    
+    + "Go on your way":
+        if to_object(COMMS_SELECTED_ID) is None:
+            ~~pass~~
+        else:
+            command_go_on_your_way(COMMS_SELECTED_ID, COMMS_ORIGIN_ID)
+            comms_receive("We will leave this sector.", title="Retreating", title_color=surrender_color)
+
+//popup/comms if has_any_role(COMMS_ORIGIN_ID, "__player__,admiral") and has_roles(COMMS_SELECTED_ID, "surrendered") and COMMS_POPUP is None
+    + "Go to location":
+        if to_object(COMMS_SELECTED_ID) is None:
+            ~~pass~~
+        elif command_to_location(COMMS_SELECTED_ID, COMMS_ORIGIN_ID, COMMS_POPUP_POINT):
+            comms_receive("Setting a course to the requested location.", title="Setting course", title_color=surrender_color)
+        else:
+            COMMAND_DESCRIPTION = f"go anywhere"
+            jump lalala_we_cant_hear_you_response
+
+//popup/comms if has_any_role(COMMS_ORIGIN_ID, "__player__,admiral") and has_roles(COMMS_SELECTED_ID, "surrendered") and COMMS_POPUP is not None and COMMS_POPUP_ID != COMMS_SELECTED_ID
+    comms_popup_name = to_object(COMMS_POPUP).name
+    + "Follow {comms_popup_name}":
+        if to_object(COMMS_SELECTED_ID) is None:
+            ~~pass~~
+        elif to_object(COMMS_POPUP_ID) is None:
+            comms_receive(f"{comms_popup_name} has been destroyed. We can't follow it.", title=f"Unable to follow {comms_popup_name}", title_color=surrender_color)
+        elif command_follow_ship(COMMS_SELECTED_ID, COMMS_ORIGIN_ID, COMMS_POPUP_ID):
+            comms_receive(f"We will follow {comms_popup_name}.", title=f"Following {comms_popup_name}", title_color=surrender_color)
+        else:
+            COMMAND_DESCRIPTION = f"follow {comms_popup_name}"
+            jump lalala_we_cant_hear_you_response
+
+===== lalala_we_cant_hear_you_response =====
+    
+    possible_responses = ["We're, um, having problems with our communication equipment. Yeah! I couldn't quite make that out...", "Sorry, I couldn't hear that over the sound of, uhhh... space whales singing! What did you say?", "Make something up about not being able to hear them. Continue on our current course. ...Wait, has this channel been ope-", "Please hold while we... troubleshoot a communication malfunction. Your call is very important to us.", "We are experiencing technical difficulties. Please stand by..."]
+    
+    if COMMAND_DESCRIPTION is not None:
+        possible_responses.append(f"There's too much interference... We couldn't hear you tell us to {COMMAND_DESCRIPTION}. Please repeat your last message.")
+    
+    response = random.choice(possible_responses)
+    comms_receive(response, title="What did you say?", title_color=surrender_color)
+    ->END
+
+//shared/signal/surrendered_nav_arrived_at_location
+    if COMMANDED_BY_SHIP_ID is not None:
+        COMMS_SELECTED_ID = SURRENDERED_SHIP_ID
+        COMMS_ORIGIN_ID = COMMANDED_BY_SHIP_ID
+        comms_receive("We have arrived at the requested location. We will hold our position here.", title="Arrived at location", title_color=surrender_color)
+    ->END

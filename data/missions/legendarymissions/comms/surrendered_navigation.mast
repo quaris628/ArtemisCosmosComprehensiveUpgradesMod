@@ -1,0 +1,97 @@
+# This file is for navigation tasks for surrendered ships.
+# These are for things that need to happen passively, i.e. between the player
+# actively giving commands to the surrendered ship. For example, the surrendered ship
+# looking for an opportunity to quietly run away, or the surrendered ship reporting
+# to the player ship that they've arrived at a location.
+
+//shared/signal/npc_surrendered
+    surrendered_ship_object = to_space_object(SURRENDERED_SHIP_ID)
+    if surrendered_ship_object is not None:
+        initialize_nav_state(surrendered_ship_object)
+
+# Every time the nav state changes, the task running these labels is killed then restarted.
+# This makes delays here essentially cancellable timers; E.g. delay_sim(60) means
+# "if the nav state doesn't change for 60 seconds, then ..."
+
+# Each label here must give at least some delay at the beginning
+# before running anything that could change the nav state, so that
+# control is ceded back to whatever task called _set_nav_state
+# so that it can finish setting/cleaning up what it needs to.
+
+===== surr_nav_state_to_spawnpoint_no_deletion =====
+    await delay_sim(seconds_before_deletion_min())
+    _set_nav_state(SURRENDERED_SHIP_ID, COMMANDED_BY_SHIP_ID, nav_state_to_spawnpoint_deletion_ok(), skip_task_cancel=True)
+    # This task must end without yielding control to the engine (no awaits or jumps)
+    ->END
+
+===== surr_nav_state_running_away_no_deletion =====
+    await delay_sim(seconds_before_deletion_min())
+    _set_nav_state(SURRENDERED_SHIP_ID, COMMANDED_BY_SHIP_ID, nav_state_running_away_deletion_ok(), skip_task_cancel=True)
+    # This task must end without yielding control to the engine (no awaits or jumps)
+    ->END
+
+===== surr_nav_state_to_spawnpoint_deletion_ok =====
+===== surr_nav_state_running_away_deletion_ok =====
+    await delay_sim(seconds_between_can_delete_checks())
+    for ignored_var while not is_close_enough_to_spawnpoint_for_deletion(SURRENDERED_SHIP_ID):
+        await delay_sim(seconds_between_can_delete_checks())
+    for ignored_var while is_a_player_too_close_for_deletion(SURRENDERED_SHIP_ID):
+        await delay_sim(seconds_between_can_delete_checks())
+    sbs.delete_object(SURRENDERED_SHIP_ID)
+    ->END
+
+===== surr_nav_state_commanded_to_stop =====
+    await delay_sim(seconds_before_run_away_min())
+    # When _try_run_away returns True, this task must end without yielding control
+    # to the engine (no awaits or jumps)
+    for ignored_var while not _try_run_away(SURRENDERED_SHIP_ID, COMMANDED_BY_SHIP_ID, skip_task_cancel=True):
+        await delay_sim(seconds_between_run_away_checks_when_stopped())
+    ->END
+
+===== surr_nav_state_commanded_to_location =====
+    ran_away = False
+    arrived = False
+    for ignored_var while not ran_away and not arrived:
+        await delay_sim(seconds_between_close_enough_to_location_and_run_away_checks())
+        surrendered_ship_object = to_space_object(SURRENDERED_SHIP_ID)
+        if surrendered_ship_object is None:
+            break
+        # When _try_run_away returns True, this task must end without yielding
+        # control to the engine (no awaits or jumps)
+        if _try_run_away(SURRENDERED_SHIP_ID, COMMANDED_BY_SHIP_ID, skip_task_cancel=True):
+            ran_away = True
+        elif is_close_enough_to_commanded_location(SURRENDERED_SHIP_ID):
+            _set_nav_state(SURRENDERED_SHIP_ID, COMMANDED_BY_SHIP_ID, nav_state_commanded_to_stop(), skip_task_cancel=True)
+            # This task must end without yielding control to the engine (no awaits or jumps)
+            _navigate_to(SURRENDERED_SHIP_ID, surrendered_ship_object.pos, throttle=0)
+            signal_emit("surrendered_nav_arrived_at_location", data={"SURRENDERED_SHIP_ID": SURRENDERED_SHIP_ID, "COMMANDED_BY_SHIP_ID": COMMANDED_BY_SHIP_ID})
+            arrived = True
+    ->END
+
+===== surr_nav_state_commanded_to_follow_ship =====
+    await delay_sim(seconds_between_update_followed_ship_position_and_run_away_checks())
+    # When _try_run_away returns true, this task must end immediately (no awaits or jumps)
+    for ignored_var while not _try_run_away(SURRENDERED_SHIP_ID, COMMANDED_BY_SHIP_ID, skip_task_cancel=True):
+        surrendered_ship_object = to_space_object(SURRENDERED_SHIP_ID)
+        if surrendered_ship_object is None:
+            break
+        following_ship_id = get_commanded_follow_ship_id(SURRENDERED_SHIP_ID)
+        following_ship_object = to_space_object(following_ship_id)
+        if following_ship_object is None:
+            # behave as if they were told to go on their way (by no one in particular)
+            _set_nav_state(SURRENDERED_SHIP_ID, None, nav_state_to_spawnpoint_no_deletion(), skip_task_cancel=True)
+            # This task must end without yielding control to the engine (no awaits or jumps)
+            _navigate_to(SURRENDERED_SHIP_ID, surrendered_ship_object.spawn_pos, throttle=1.5)
+            break
+        if is_distance_closer_than_or_equal_to(surrendered_ship_object.pos, following_ship_object.pos, close_enough_to_have_arrived_radius()):
+            throttle = 0
+        else:
+            throttle = 1
+        _navigate_to(SURRENDERED_SHIP_ID, following_ship_object.pos, throttle=throttle)
+        await delay_sim(seconds_between_update_followed_ship_position_and_run_away_checks())
+    ->END
+
+//damage/destroy if has_role(DESTROYED_ID, "surrendered")
+    nav_task = get_inventory_value(DESTROYED_ID, inventory_key_surrendered_nav_task())
+    if nav_task is not None:
+        task_cancel(nav_task)
