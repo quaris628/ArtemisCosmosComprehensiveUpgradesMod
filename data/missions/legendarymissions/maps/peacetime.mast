@@ -877,7 +877,7 @@ yield success
     remove_role(kidnapper_id, "suspect")
     remove_role(kidnapper_id, "civ")
     remove_role(kidnapper_id, "civilian")
-    add_role(kidnapper_id, "pirate")
+    add_role(kidnapper_id, "raider")
     add_role(kidnapper_id, "discovered")
     side = "tsn"
     _obj = to_object(kidnapper_id)
@@ -887,15 +887,10 @@ yield success
     side_set_object_side(_obj, "raider")
 
     target_pos(kidnapper_id, 90000, 0, 90000, throttle=1.5, target_id=0)
-
-//enable/comms if has_roles(COMMS_SELECTED_ID, "discovered")
-//comms if has_role(COMMS_SELECTED_ID, "discovered")
-
-    check_surrender = get_data_set_value(COMMS_SELECTED_ID, "surrender_flag")
-    if check_surrender == 1:
-        yield fail
-    else:
-        + "Surrender now"  handle_kidnapper_surrender
+    
+    override_surrender_conditions(kidnapper_id, cowardly=True, never_surrender=False, base_shield_threshold=50)
+    
+    ->END
 
 //enable/science if has_roles(SCIENCE_SELECTED_ID, "discovered")
 //science if has_roles(SCIENCE_SELECTED_ID, "discovered")
@@ -915,42 +910,26 @@ yield success
 
     yield success
 
-===== handle_kidnapper_surrender ====
-
-    blob = to_blob(COMMS_SELECTED_ID)
-    ->END if blob is None
-    player = to_object(COMMS_ORIGIN_ID)
-    ->END if player is None
-    name = player.name
-
-    sc_timer = get_inventory_value(COMMS_ORIGIN_ID, "sc_timer", 0)
-    shield_count = blob.get("shield_count", 0)
-    s_ratio = 100
-    for s in range(shield_count):
-        s_max = blob.get("shield_max_val", s )
-        s_cur = blob.get("shield_val", s )
-        s_ratio = min(s_cur/s_max, s_ratio)
-
-    # Ship surrenders if Secret Codecase active or if shields < 50%
-    if sc_timer > 0 or s_ratio < 0.5:
-        kidnap_status = 3
-        sc_timer = 0
-        set_inventory_value(COMMS_ORIGIN_ID, "sc_timer", sc_timer )
-        e_obj = to_engine_object(COMMS_SELECTED_ID)
-        _pos_eo = e_obj.pos
-        _offset = e_obj.forward_vector()
-        stop_pos = _pos_eo + (_offset * 500)
-        target_pos(COMMS_SELECTED_ID, stop_pos.x, stop_pos.y, stop_pos.z, throttle=0.0, target_id=0, stop_dist=500)
-        drop_pos = _pos_eo + (_offset * -100)
-        comms_receive(f"""Escape Pod Deployed.""", title="Escape Pod", title_color=surrender_color)
-        pickup_spawn(drop_pos.x, drop_pos.y, drop_pos.z, "escape-pod")
-        await task_schedule(comms_do_surrender)
-        remove_role(COMMS_SELECTED_ID, "surrendered")
-        clear_target(COMMS_SELECTED_ID)
-    else:
-        comms_receive(f"""What are you talking about, {name}? We don't know anything about the ambassador!""", title="failed surrender", title_color=raider_color)
-
-    yield success
+//shared/signal/npc_surrendered if has_role(SURRENDERED_SHIP_ID, "kidnapper")
+    kidnapper_object = to_space_object(SURRENDERED_SHIP_ID)
+    if kidnapper_object is None:
+        # The kidnapper ship must have been destroyed; let the destruction handler handle things
+        ->END
+    
+    clear_target(SURRENDERED_SHIP_ID)
+    kidnap_status = 3
+    
+    kidnapper_eng_obj = to_engine_object(SURRENDERED_SHIP_ID)
+    nav_to_position = kidnapper_eng_obj.pos + 500 * kidnapper_eng_obj.forward_vector()
+    nav_to_location(SURRENDERED_SHIP_ID, None, nav_to_position)
+    
+    drop_pos = kidnapper_eng_obj.pos + -100 * kidnapper_eng_obj.forward_vector()
+    pickup_spawn(drop_pos.x, drop_pos.y, drop_pos.z, "escape-pod")
+    COMMS_ORIGIN_ID = REQUESTED_BY_PLAYER_SHIP_ID
+    COMMS_SELECTED_ID = SURRENDERED_SHIP_ID
+    comms_receive("Escape Pod Deployed.", title="Escape Pod", title_color=surrender_color)
+    
+    ->END
 
 ===== pest_messages =====
 
