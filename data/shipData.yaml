@@ -426,6 +426,102 @@
       }
     },
     {
+      "key": "pirate_longbow_ef",
+      "name": "Longbow",
+      "origin": "Pirate",
+      "side": "Pirate",
+      "artfileroot": "longbow",
+      "meshscale": 0.0656711384654045,
+      "radarscale": 1.0,
+      "exclusionradius": 50.0,
+      "meshrotate": 0,
+      "shields": [
+        80,
+        80
+      ],
+      "hullpoints": 2,
+      "long_desc": "Scout of the pirate fleet. Most common type of pirate vessel.^1 forward beam^1 torpedo tube^Stores for 8 homings, 2 EMPs, 4 mines^Shields 80 front, 80 rear^Warp drive",
+      "tubecount": 1,
+      "torpedostart": [
+        {
+          "Homing": 6
+        },
+        {
+          "Nuke": 0
+        },
+        {
+          "EMP": 2
+        },
+        {
+          "Mine": 1
+        }
+      ],
+      #     "torpedostart": {"Homing": 8, "Nuke": 0, "EMP": 2, "Mine": 1 },
+      "internalmapscale": 1.0,
+      "internalmapw": 11,
+      "internalmaph": 11,
+      "internalsymmetry": 1,
+      "turn_rate": 1.5,
+      "speed_coeff": 1.4,
+      "scan_strength_coeff": 1.0,
+      "ship_energy_cost": 0.7,
+      "warp_energy_cost": 0.7,
+      "jump_energy_cost": 2.0,
+      "roles": "ship,scout,pirate",
+      "hull_port_sets": {
+        "beam Primary Beams": [
+          {
+            "position": [
+              0.0,
+              -25.0344066619873,
+              270.154418945312
+            ],
+            "color": "#67228f",
+            "arccolor": "#3ff",
+            "cycle_time": 6,
+            "damage_coeff": 1,
+            "range": 1000,
+            "arcwidth": 144,
+            "barrel_angle": 0
+          }
+        ],
+        "exhaust": [
+          {
+            "position": [
+              -50.2840347290039,
+              -26.6387996673584,
+              -233.061477661133
+            ],
+            "color": "#1b5701"
+          },
+          {
+            "position": [
+              50.2840347290039,
+              -26.6387996673584,
+              -233.061477661133
+            ],
+            "color": "#1b5701"
+          },
+          {
+            "position": [
+              -50.2840347290039,
+              -60.6387996673584,
+              -233.061477661133
+            ],
+            "color": "#1b5701"
+          },
+          {
+            "position": [
+              50.2840347290039,
+              -60.6387996673584,
+              -233.061477661133
+            ],
+            "color": "#1b5701"
+          }
+        ]
+      }
+    },
+    {
       #---------------------------------- data for default 3d data (if other data not found) --------------------------------
       "key": "unknown",
       "name": "unknown",
