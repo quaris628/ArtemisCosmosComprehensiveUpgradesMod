@@ -426,6 +426,163 @@
       }
     },
     {
+      "key": "pirate_brigantine_ef",
+      "name": "Brigantine",
+      "origin": "Pirate",
+      "side": "Pirate",
+      "artfileroot": "Brigantine",
+      "meshscale": 0.059763390570879,
+      "radarscale": 1.0,
+      "exclusionradius": 50.0,
+      "meshrotate": 0,
+      "shields": [
+        150,
+        120
+      ],
+      "hullpoints": 5,
+      "long_desc": "Corvette and light carrier of the pirate fleet.^2 rotatable forward beams, 1 rear beam^2 torpedo tubes^Stores for 12 homings, 12 EMPs, 4 mines^Shields 150 front, 120 rear^3 fighters, 2 bombers^Warp drive",
+      "baycount": 5,
+      "tubecount": 2,
+      "torpedostart": [
+        {
+          "Homing": 12
+        },
+        {
+          "Nuke": 0
+        },
+        {
+          "EMP": 12
+        },
+        {
+          "Mine": 4
+        }
+      ],
+      #     "torpedostart": {"Homing": 12, "Nuke": 0, "EMP": 12, "Mine": 4 },
+      "internalmapscale": 1.0,
+      "internalmapw": 12,
+      "internalmaph": 12,
+      "internalsymmetry": 1,
+      "turn_rate": 0.8,
+      "speed_coeff": 1,
+      "scan_strength_coeff": 1,
+      "ship_energy_cost": 1,
+      "warp_energy_cost": 1.2,
+      "jump_energy_cost": 2.2,
+      "roles": "ship,pirate,carrier",
+      "hull_port_sets": {
+        "beam Primary Beams": [
+          {
+            "position": [
+              27.2436256408691,
+              88.7021255493164,
+              82.4280090332031
+            ],
+            "color": "#67228f",
+            "arccolor": "#3ff",
+            "cycle_time": 6,
+            "damage_coeff": 1,
+            "range": 1200,
+            "arcwidth": 72,
+            "barrel_angle": 21
+          },
+          {
+            "position": [
+              -27.2436256408691,
+              88.7021255493164,
+              82.4280090332031
+            ],
+            "color": "#67228f",
+            "arccolor": "#3ff",
+            "cycle_time": 6,
+            "damage_coeff": 1,
+            "range": 1200,
+            "arcwidth": 72,
+            "barrel_angle": 339
+          },
+          {
+            "position": [
+              0.0,
+              109.569381713867,
+              -629.429077148438
+            ],
+            "color": "#67228f",
+            "arccolor": "#09f",
+            "cycle_time": 3,
+            "damage_coeff": 0.4,
+            "range": 1500,
+            "arcwidth": 52.5,
+            "barrel_angle": 180
+          }
+        ],
+        "exhaust": [
+          {
+            "position": [
+              -248.325,
+              -3.335,
+              -570.747
+            ],
+            "color": "#1b5701"
+          },
+          {
+            "position": [
+              248.325,
+              -3.335,
+              -570.747
+            ],
+            "color": "#1b5701"
+          },
+          {
+            "position": [
+              -190.0,
+              -3.335,
+              -570.747
+            ],
+            "color": "#1b5701"
+          },
+          {
+            "position": [
+              190.0,
+              -3.335,
+              -570.747
+            ],
+            "color": "#1b5701"
+          },
+          {
+            "position": [
+              -99.4990005493164,
+              32.8330001831055,
+              -624.247985839844
+            ],
+            "color": "#1b5701"
+          },
+          {
+            "position": [
+              99.4990005493164,
+              32.8330001831055,
+              -624.247985839844
+            ],
+            "color": "#1b5701"
+          },
+          {
+            "position": [
+              0.0,
+              54.0,
+              -580.0
+            ],
+            "color": "#1b5701"
+          },
+          {
+            "position": [
+              0.0,
+              -16.0,
+              -580.0
+            ],
+            "color": "#1b5701"
+          }
+        ]
+      }
+    },
+    {
       "key": "pirate_longbow_ef",
       "name": "Longbow",
       "origin": "Pirate",
