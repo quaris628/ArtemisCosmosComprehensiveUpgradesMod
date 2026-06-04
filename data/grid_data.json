@@ -1,4 +1,5 @@
-{"tsn_light_cruiser":
+{
+"tsn_light_cruiser":
  {"grid_objects": [
    {"x": 2.0,"y": 14.0,"name": "WARP","scale": 1.0,"roles": "system,ENGINE,WARP"},
    {"x": 2.0,"y": 13.0,"name": "WARP","scale": 1.0,"roles": "system,ENGINE,WARP"},
