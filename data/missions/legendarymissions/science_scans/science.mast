@@ -129,8 +129,10 @@ default shared DEFAULT_SCIENCE_AUTO_SCAN = True
 
     taunt_trait=get_inventory_value(SCIENCE_SELECTED_ID, "taunt_trait")
     intel_list = get_inventory_value(SCIENCE_SELECTED_ID, "taunt_data")
+    brave = is_brave(SCIENCE_SELECTED_ID)
+    cowardly = is_cowardly(SCIENCE_SELECTED_ID)
 
-    taunt_intel = "The captain cannot be taunted."
+    captain_intel = "The captain cannot be taunted."
     bio_intel = "The bio scan has failed."
 
     race = get_race(SCIENCE_SELECTED_ID)
@@ -142,12 +144,20 @@ default shared DEFAULT_SCIENCE_AUTO_SCAN = True
         elite_intel = "Warning: Elite abilities " + elite_get_abilities_scan(SCIENCE_SELECTED_ID)
 
         
-    taunt_intel = "The captain cannot be taunted {race}."
+    captain_intel = "The captain cannot be taunted {race}."
     bio_intel = f"A bunch of {race} creatures."
 
     if taunt_trait is not None and intel_list is not None:
-        taunt_intel = intel_list[taunt_trait]['science']
-
+        captain_intel = intel_list[taunt_trait]['science']
+    
+    if brave or cowardly:
+        if captain_intel[-1] == ".":
+            captain_intel = captain_intel[:-1]
+        if brave:
+            captain_intel = captain_intel + ", and is brave."
+        else:
+            captain_intel = captain_intel + ", and is cowardly."
+    
     + "scan":
         <scan>
             " Enemy vessel. Exercise caution.
@@ -156,9 +166,9 @@ default shared DEFAULT_SCIENCE_AUTO_SCAN = True
         <scan>
             " Dynamic properties will appear in this area.
 
-    + "intel" {"taunt_intel": taunt_intel, "elite_intel": elite_intel}:
+    + "intel" {"captain_intel": captain_intel, "elite_intel": elite_intel}:
         <scan>
-            " {taunt_intel}
+            " {captain_intel}
             " {elite_intel}
 
     + "bio" {"bio_intel": bio_intel}:

@@ -36,13 +36,6 @@
             "science": "The captain was recently overheard bragging about his spotless reputation in a space-bar."
         },
         {
-            "button": "Taunt bravery",
-            "transmit": "Hey grub-face! If you skitter away like a frightened hatchling, do you have to give that shiny medal back?",
-            "failure": "Fools will not be heard, {name}. Cease all communication.",
-            "success": "Insolence will not be tolerated, {name}. Prepare for death!",
-            "science": "The captain was recently awarded a commendation for bravery by the High Priest Council."
-	},
-        {
             "button": "Taunt hygiene",
             "transmit": "Hey stink-bug! I can smell your rancid body odor from the other side of this sector!",
             "failure": "Your bad-words bounce off Kralien chitin, {name}. Do not bother Kraliens again.",
@@ -90,13 +83,6 @@
             "failure": "You place great value in appearances, {name}. Kraliens do not appear to care.",
             "success": "Putrescent mucus-faces! Kraliens will repaint this ship with your blood!",
             "science": "The captain is proud of their ship's appearance and frequently brags about its beauty."
-        },
-        {
-            "button": "Taunt cowardice",
-            "transmit": "Hey, skitter-bug! We didn't expect you to stay, but maybe you're running away from a different battle?",
-            "failure": "Wise Kraliens know when to retreat, {name}, and also when to ignore silly taunts.",
-            "success": "Brave Kraliens will not tolerate these insults, {name}! You will be destroyed!",
-            "science": "The captain has surrendered or retreated from their last three engagements."
         },
         {
             "button": "Taunt former piracy",
@@ -192,13 +178,6 @@
             "science": "The captain recently got into a fight over a mala-mala game after another player criticized their intelligence."
         },
         {
-            "button": "Taunt cowardice",
-            "transmit": "Wow, I haven't seen an Arvonian move that fast since you got scared and ran away at the Battle of Gemini Rift!",
-            "failure": "You're not worth the bother, {name}. Find someone else to annoy.",
-            "success": "Many brave Arvonians died that day, {name}. Prepare to join them!",
-            "science": "The captain was reprimanded at the Battle of Gemini Rift for failing to engage the enemy."
-	},
-        {
             "button": "Taunt disgraced family",
             "transmit": "Your superiors must not consider us a threat, if they are throwing their dregs and washouts after us!",
             "failure": "Your prattling nonsense is beneath me, {name}. Communications ceased.",
@@ -248,13 +227,6 @@
             "failure": "Patience, {name}. Your inevitable death will come soon enough.",
             "success": "Death comes to us all, {name}. Apparently your time has arrived. Full speed ahead!",
             "science": "At the last refit, maintenance records show that the captain complained about the ship's lack of speed."
-        },
-        {
-            "button": "Taunt cowardice",
-            "transmit": "Hey there, squid-face! If you're too scared to fight, maybe you could surrender to our shuttle?",
-            "failure": "That is old history, {name}. Today is another day. No further communication.",
-            "success": "We will not tolerate such insolence, {name}! We will destroy you!",
-            "science": "The captain surrendered a Behemoth-class dreadnought to a pirate scout at the Battle of Polaris Wharf."
         },
         {
             "button": "Taunt captain's appetite",

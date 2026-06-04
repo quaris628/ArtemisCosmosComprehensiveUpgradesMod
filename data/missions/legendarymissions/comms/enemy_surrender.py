@@ -1,3 +1,4 @@
+from enum import Enum
 from random import random, randrange
 
 from sbs_utils.procedural.comms import comms_navigate, comms_receive, comms_receive_internal
@@ -19,6 +20,10 @@ from data.missions.common.pirate_features_definitions import is_raider
 _RADIUS_CLOSE_ENOUGH_FOR_SURRENDER = 5000
 _RADIUS_CLOSE_ENOUGH_FOR_CODE_CASE = _RADIUS_CLOSE_ENOUGH_FOR_SURRENDER
 
+# _CHANCE_BRAVE + _CHANCE_COWARDLY must be less than or equal to 1.0
+_CHANCE_BRAVE = 0.15
+_CHANCE_COWARDLY = 0.15
+
 # Absolute range across all possible ships
 _BASE_SHIELD_THRESHOLD_FOR_SURRENDER_MIN = 10 # Inclusive
 _BASE_SHIELD_THRESHOLD_FOR_SURRENDER_MAX = 50 # Exclusive
@@ -32,7 +37,12 @@ def _get_base_shield_threshold_for_surrender_range(ship_id):
     details of how the base shield thresholds are used.
     Valid range is 0 to 100. Minimum is inclusive, and maximum is exclusive.
     """
-    return _BASE_SHIELD_THRESHOLD_FOR_SURRENDER_MIN, _BASE_SHIELD_THRESHOLD_FOR_SURRENDER_MAX
+    if is_brave(ship_id):
+        return _BASE_SHIELD_THRESHOLD_FOR_SURRENDER_MIN, 30
+    elif is_cowardly(ship_id):
+        return 30, _BASE_SHIELD_THRESHOLD_FOR_SURRENDER_MAX
+    else:
+        return _BASE_SHIELD_THRESHOLD_FOR_SURRENDER_MIN, _BASE_SHIELD_THRESHOLD_FOR_SURRENDER_MAX
 
 def _get_chance_never_surrender(ship_id):
     """
@@ -41,7 +51,12 @@ def _get_chance_never_surrender(ship_id):
     1.0 means the ship will never be surrenderable
     0.5 means there's a 50%-50% chance of being surrenderable
     """
-    return 0.2
+    if is_brave(ship_id):
+        return 0.4
+    elif is_cowardly(ship_id):
+        return 0.0
+    else:
+        return 0.2
 
 # ----- Which enemy npcs can be asked to surrender? -----
 
@@ -117,8 +132,23 @@ def setup_surrender_conditions(ship_id):
         possible points) is less than the base shield threshold divided by 100 points
     then the ship will surrender when asked.
     """
+    # brave/cowardly must be set before calling _get_random_base_shield_threshold
+    # because the latter depends on the former
+    brave, cowardly = _get_random_brave_or_cowardly()
+    set_brave_or_cowardly(ship_id, brave=brave, cowardly=cowardly)
+    
     threshold = _get_random_base_shield_threshold(ship_id)
     set_base_shield_threshold_for_surrender(ship_id, threshold)
+
+def _get_random_brave_or_cowardly():
+    """
+    Returns brave, cowardly (both booleans).
+    Picked randomly. Chances determined by _CHANCE_BRAVE and _CHANCE_COWARDLY.
+    """
+    random_value = random()
+    brave = random_value < _CHANCE_BRAVE
+    cowardly = 1 - _CHANCE_COWARDLY <= random_value
+    return brave, cowardly
 
 def _get_random_base_shield_threshold(ship_id, is_never_surrender_possible=True):
     """
@@ -136,23 +166,39 @@ def _get_random_base_shield_threshold(ship_id, is_never_surrender_possible=True)
         shield_threshold_min, shield_threshold_max = _get_base_shield_threshold_for_surrender_range(ship_id)
         return randrange(shield_threshold_min, shield_threshold_max)
 
-def override_surrender_conditions(ship_id, never_surrender=None, base_shield_threshold=None):
+def override_surrender_conditions(ship_id, brave=False, cowardly=False, never_surrender=None, base_shield_threshold=None):
     """
     Manually sets the conditions (if any) under which a specific ship will surrender if asked.
     
     Calling this will completely replace the conditions that were randomly
     determined by a previous call of setup_surrender_conditions.
+    For example, if a ship was randomly chosen to be brave in
+    setup_surrender_conditions, and next override_surrender_conditions is called for
+    it with a base_shield_threshold passed but not is_brave or is_cowardly passed,
+    then that ship will no longer be considered brave.
+    Or if a ship was randomly assigned a base shield threshold of 10 in
+    setup_surrender_conditions, and next override_surrender_conditions is called
+    for it with is_cowardly passed as True but base_shield_threshold is not passed,
+    then its base shield threshold will be reassigned to some random value between
+    30 and 50 (because that's the threshold range for cowardly ships).
     
     Note that this function allows for conditions that are not possible via
     the normal random setup in setup_surrender_conditions. For example, you can have
-    a ship with a base shield threshold of 100 meaning it will surrender the first
-    time it's asked no matter its shields.
-    So just watch out for combinations of arguments that you think would be unreasonable.
+    a cowardly captain that never surrenders, or a ship with a base shield threshold
+    of 100 meaning it will surrender the first time it's asked no matter its shields.
+    So just watch out for combinations of arguments that you think would be confusing
+    for players, or are otherwise unreasonable.
     (There might be some niche use cases for weird surrendering conditions that I don't
-    know about, so I wanted to err on the side of supporting/allowing unusual situations.)
+    know about, so I wanted to err on the side of allowing them.)
     
     Args:
         ship_id (int): id of the enemy ship
+        brave (bool | None): Default False. Set to True to make the ship's
+            captain brave. Note that it is not valid to have a captain that is
+            both brave and cowardly.
+        cowardly (bool | None): Default False. Set to True to make the ship's
+            captain cowardly. Note that it is not valid to have a captain that is
+            both brave and cowardly.
         never_surrender (bool | None): Defaults to a random value determined
             the same way as in setup_surrender_conditions, based on the new is_brave
             and is_cowardly values.
@@ -165,6 +211,9 @@ def override_surrender_conditions(ship_id, never_surrender=None, base_shield_thr
             Recommended values are between 10 and 50.
             See _get_base_shield_threshold_for_surrender()'s description for details.
     """
+    # brave/cowardly must be set before calling _get_random_base_shield_threshold
+    set_brave_or_cowardly(ship_id, brave=brave, cowardly=cowardly)
+    
     if never_surrender is True:
         base_shield_threshold = _BASE_SHIELD_THRESHOLD_FOR_SURRENDER_NEVER_VALUE
     elif base_shield_threshold is None:
@@ -177,6 +226,27 @@ def has_surrender_conditions_set_up(ship_id):
     has been called for this ship at least once, otherwise False.
     """
     return _get_base_shield_threshold_for_surrender(ship_id) is not None
+
+def is_brave(ship_id):
+    """Returns True if this ship's captain is brave, otherwise False."""
+    return get_inventory_value(ship_id, _INVENTORY_KEY_IS_BRAVE_OR_COWARDLY) == BraveOrCowardlyValue.BRAVE
+
+def is_cowardly(ship_id):
+    """Returns True if this ship's captain is cowardly, otherwise False."""
+    return get_inventory_value(ship_id, _INVENTORY_KEY_IS_BRAVE_OR_COWARDLY) == BraveOrCowardlyValue.COWARDLY
+
+def set_brave_or_cowardly(ship_id, brave=False, cowardly=False):
+    """
+    Sets whether this ship's captain is brave, cowardly, or neither.
+    It is not valid to have a captain that is both brave and cowardly.
+    """
+    if brave:
+        brave_or_cowardly_value = BraveOrCowardlyValue.BRAVE
+    elif cowardly:
+        brave_or_cowardly_value = BraveOrCowardlyValue.COWARDLY
+    else:
+        brave_or_cowardly_value = BraveOrCowardlyValue.NEITHER
+    set_inventory_value(ship_id, _INVENTORY_KEY_IS_BRAVE_OR_COWARDLY, brave_or_cowardly_value)
 
 def will_never_surrender(ship_id):
     """
@@ -529,6 +599,12 @@ def code_case_attempt_result_player_has_no_code_cases():
 _BASE_SHIELD_THRESHOLD_FOR_SURRENDER_NEVER_VALUE = -1
 _INVENTORY_KEY_IS_CODE_CASE_SURRENDER = "code_case_surr"
 _INVENTORY_KEY_BASE_SHIELD_THRESHOLD_FOR_SURRENDER = "surr_shld_thresh"
+_INVENTORY_KEY_IS_BRAVE_OR_COWARDLY = "brv_cwrd"
+
+class BraveOrCowardlyValue(Enum):
+    BRAVE = 1
+    COWARDLY = 2
+    NEITHER = 3
 
 # DO NOT CHANGE
 # these values are used by places in the code that do not reference these variables
