@@ -4,6 +4,7 @@ from sbs_utils.procedural.comms import comms_navigate, comms_receive, comms_rece
 from sbs_utils.procedural.execution import get_shared_variable, set_shared_variable, set_variable
 from sbs_utils.procedural.inventory import get_inventory_value, set_inventory_value
 from sbs_utils.procedural.roles import add_role, has_role, remove_role
+from sbs_utils.procedural.signal import signal_emit
 
 from data.missions.common.distance_utils import is_distance_farther_than_or_equal_to
 from data.missions.common.pirate_features_definitions import is_raider
@@ -87,6 +88,11 @@ def _set_surrendered(ship_object, player_ship_object, via_code_case=False):
     
     if via_code_case:
         set_inventory_value(ship_object.id, _INVENTORY_KEY_IS_CODE_CASE_SURRENDER, True)
+    
+    # Emit this prior to removing the raider role, so that listeners can
+    # distinguish raiders surrendering from other vessels surrendering.
+    # (The latter does not exist in the game currently, but might in the future.)
+    signal_emit("npc_surrendered", data={"SURRENDERED_SHIP_ID": ship_object.id, "REQUESTED_BY_PLAYER_SHIP_ID": player_ship_object.id, "IS_VIA_CODE_CASE": via_code_case})
     
     remove_role(ship_object.id, "raider")
     fleet_remove_ship(ship_object.id)
