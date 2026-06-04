@@ -201,6 +201,20 @@ shared COMMS_PROTOTYPE  = SETTINGS.get("COMMS_PROTOTYPE", False)
     on gui_message(gui_button("Homing to\n100 energy")):
         to_energy(player_ship_id, ordinance_type_homing())
     
+    if has_orientable_beams(player_ship_id):
+        gui_section(style=f"area:86,100-435px,100,100-385px;")
+        gui_layout_widget("shield_control")
+        gui_section(style=f"area:80,100-380px,100,100-260px;")
+        gui_row()
+        gui_layout_widget("weap_beam_freq")
+        gui_row()
+        gui_layout_widget("weap_beam_speed")
+        gui_section(style="area:86,100-240px,100,100-185px;")
+        on gui_message(gui_button("Focus ahead")):
+            orient_beams_forward(player_ship_id)
+        on gui_message(gui_button("Spread broad")):
+            orient_beams_broad(player_ship_id)
+    
     yield idle
 
 //gui/normal_main

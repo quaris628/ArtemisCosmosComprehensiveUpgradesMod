@@ -309,6 +309,7 @@
       "hull_port_sets": {
         "beam Primary Beams": [
           {
+            # if updating angles or arc widths, also update orient_beams.py
             "position": [
               111.035270690918,
               14.9025430679321,
@@ -472,6 +473,7 @@
       "hull_port_sets": {
         "beam Primary Beams": [
           {
+            # if updating angles or arc widths, also update orient_beams.py
             "position": [
               27.2436256408691,
               88.7021255493164,
