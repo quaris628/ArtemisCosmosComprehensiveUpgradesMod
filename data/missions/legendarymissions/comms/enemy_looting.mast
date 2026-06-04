@@ -1,0 +1,69 @@
+
+//shared/signal/npc_surrendered
+    surrendered_ship_object = to_space_object(SURRENDERED_SHIP_ID)
+    if surrendered_ship_object is None:
+        ->END
+    surrendered_ship_name = surrendered_ship_object.name
+    
+    # e.g. a ship with 50/50 shields will take ~1 second,
+    # a ship with 200/200 shields will take ~4 seconds,
+    # a ship with 600/600 shields will take ~12 seconds
+    approx_seconds_required_to_loot = 0.02 * get_average_max_shields(surrendered_ship_object.data_set)
+    rendezvous_counters = {}
+    
+    jump looting_rendezvous_loop
+
+======== looting_rendezvous_loop =========
+    
+    await delay_sim(1)
+    
+    surrendered_ship_object = to_space_object(SURRENDERED_SHIP_ID)
+    if surrendered_ship_object is None:
+        # Ship was destroyed; plunder interrupted!
+        for COMMS_ORIGIN_ID in rendezvous_counters:
+            short_message = f"Plunder interrupted for {surrendered_ship_name}!"
+            long_message = f"{surrendered_ship_name} didn't survive long enough to get any loot from!"
+            msg_color = looting_comms_messages_color()
+            comms_broadcast(COMMS_ORIGIN_ID, msg=short_message, color=msg_color)
+            comms_receive_internal(long_message, title=short_message, title_color=msg_color)
+        ->END
+    
+    # This should never happen with the current code, but still check
+    # this in case another method of looting gets added in the future
+    if is_looted(SURRENDERED_SHIP_ID) is not None:
+        ->END
+    
+    # Sometimes, multiple pirate ships will compete for the same ship's loot.
+    # Count how long each pirate is in the vicinity of the surrendered ship.
+    # Award the loot to the first pirate ship to stay close enough continuously.
+    
+    new_rendezvous_counters = {}
+    completed_rendezvous_ship_objects = []
+    # 0x20 is bitmask value that filters for player ships
+    for player_ship_object in get_space_objects_within_radius(surrendered_ship_object.pos, loot_rendezvous_radius(), broad_type = 0x20):
+        if not can_loot(player_ship_object.id):
+            continue
+        elif player_ship_object.id not in rendezvous_counters:
+            # rendezvous is starting
+            new_rendezvous_counters[player_ship_object.id] = 0
+        else:
+            # rendezvous is progressing
+            new_rendezvous_counters[player_ship_object.id] = rendezvous_counters[player_ship_object.id] + 1
+            if approx_seconds_required_to_loot <= new_rendezvous_counters[player_ship_object.id]:
+                # rendezvous is complete
+                completed_rendezvous_ship_objects.append(player_ship_object)
+                # keep looping in case another pirate completed a rendezvous
+                # at the same time
+    # ships no longer in the radius will effectively be removed from rendezvous_counters
+    rendezvous_counters = new_rendezvous_counters
+    
+    if len(completed_rendezvous_ship_objects) == 0:
+        jump looting_rendezvous_loop
+    
+    # ----- rendezvous completed -----
+    
+    # If there is a tie, break it randomly
+    looted_by_player_ship_object = random.choice(completed_rendezvous_ship_objects)
+    loot(surrendered_ship_object, looted_by_player_ship_object)
+    
+    ->END
