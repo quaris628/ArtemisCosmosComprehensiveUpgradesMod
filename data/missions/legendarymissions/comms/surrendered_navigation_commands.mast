@@ -20,7 +20,12 @@
                 COMMAND_DESCRIPTION = None
                 jump lalala_we_cant_hear_you_response
             
-            hail_response_message_components = [hail_response_nav_state_component]
+            if is_looted(COMMS_SELECTED_ID):
+                hail_response_already_looted_component = "All our cargo has been seized."
+            else:
+                hail_response_already_looted_component = ""
+            
+            hail_response_message_components = [hail_response_nav_state_component, hail_response_already_looted_component]
             hail_response_message = "\n".join([message_component for message_component in hail_response_message_components if 0 < len(message_component)])
             
             comms_receive(hail_response_message, title="Hail", title_color=surrender_color)
