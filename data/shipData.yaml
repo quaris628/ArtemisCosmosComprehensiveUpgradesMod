@@ -260,6 +260,172 @@
       }
     },
     {
+      "key": "pirate_strongbow_ef",
+      "name": "Strongbow",
+      "origin": "Pirate",
+      "side": "Pirate",
+      "artfileroot": "strongbow",
+      "meshscale": 0.0577181242406368,
+      "radarscale": 1.0,
+      "exclusionradius": 50.0,
+      "meshrotate": 0,
+      "shields": [
+        150,
+        150
+      ],
+      "hullpoints": 4,
+      "long_desc": "Cruiser of the pirate fleet.^2 forward beams, 2 rotatable side beams^2 torpedo tubes^Stores for 12 homings, 2 nukes, 12 EMPs, 4 mines^Shields 150 front, 150 rear^1 bomber^Warp drive",
+      "baycount": 1,
+      "tubecount": 2,
+      "torpedostart": [
+        {
+          "Homing": 12
+        },
+        {
+          "Nuke": 2
+        },
+        {
+          "EMP": 12
+        },
+        {
+          "Mine": 4
+        }
+      ],
+#     "torpedostart": {"Homing": 12, "Nuke": 0, "EMP": 12, "Mine": 2 },
+      # adjust how the grid fits to the 2d silhouette?
+      "internalmapscale": 1.0,
+      # engineering grid width/height
+      "internalmapw": 11,
+      "internalmaph": 11,
+      # only 1 or 0? integer; forces the engineering grid to be symmetrical even if the silhouette has the slightest asymmetries
+      "internalsymmetry": 1,
+      "turn_rate": 0.9,
+      "speed_coeff": 1.0,
+      "scan_strength_coeff": 1,
+      "ship_energy_cost": 1.1,
+      "warp_energy_cost": 1.1,
+      "jump_energy_cost": 2.2,
+      "roles": "ship, pirate",
+      "hull_port_sets": {
+        "beam Primary Beams": [
+          {
+            "position": [
+              111.035270690918,
+              14.9025430679321,
+              382.432922363281
+            ],
+            "color": "#67228f",
+            "arccolor": "#0ff",
+            "cycle_time": 4,
+            "damage_coeff": 0.8,
+            "range": 1200,
+            "arcwidth": 72,
+            "barrel_angle": 6.17
+          },
+          {
+            "position": [
+              -111.035270690918,
+              14.9025430679321,
+              382.432922363281
+            ],
+            "color": "#67228f",
+            "arccolor": "#0ff",
+            "cycle_time": 4,
+            "damage_coeff": 0.8,
+            "range": 1200,
+            "arcwidth": 72,
+            "barrel_angle": 353.83
+          },
+          {
+            "position": [
+              248.329742431641,
+              14.6661500930786,
+              218.288269042969
+            ],
+            "color": "#67228f",
+            "arccolor": "#0ff",
+            "cycle_time": 4,
+            "damage_coeff": 0.8,
+            "range": 1200,
+            "arcwidth": 72,
+            "barrel_angle": 63.88
+          },
+          {
+            "position": [
+              -248.329742431641,
+              14.6661500930786,
+              218.288269042969
+            ],
+            "color": "#67228f",
+            "arccolor": "#0ff",
+            "cycle_time": 4,
+            "damage_coeff": 0.8,
+            "range": 1200,
+            "arcwidth": 72,
+            "barrel_angle": 296.12
+          }
+        ],
+        "exhaust": [
+          {
+            "position": [
+              -400.0,
+              -137.0,
+              -657.576599121094
+            ],
+            "color": "#1b5701"
+          },
+          {
+            "position": [
+              400.0,
+              -137.0,
+              -657.576599121094
+            ],
+            "color": "#1b5701"
+          },
+          {
+            "position": [
+              -101.598770141602,
+              20.3027496337891,
+              -657.576599121094
+            ],
+            "color": "#1b5701"
+          },
+          {
+            "position": [
+              101.598770141602,
+              20.3027496337891,
+              -657.576599121094
+            ],
+            "color": "#1b5701"
+          },
+          {
+            "position": [
+              -235.820663452148,
+              -54.4784965515137,
+              -657.266052246094
+            ],
+            "color": "#1b5701"
+          },
+          {
+            "position": [
+              235.820663452148,
+              -54.4784965515137,
+              -657.266052246094
+            ],
+            "color": "#1b5701"
+          },
+          {
+            "position": [
+              0.0,
+              54.0,
+              -707.0
+            ],
+            "color": "#1b5701"
+          }
+        ]
+      }
+    },
+    {
       #---------------------------------- data for default 3d data (if other data not found) --------------------------------
       "key": "unknown",
       "name": "unknown",

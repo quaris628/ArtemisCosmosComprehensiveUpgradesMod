@@ -76,6 +76,61 @@
    
    {"x": 4.0,"y": 2.0,"name": "computer","scale": 1.2,"roles": "room,computer"}
   ]},
+"pirate_strongbow_ef":
+ {"grid_objects": [
+ 
+   {"x": 3.0,"y": 3.0,"name": "beam","scale": 1.0,"roles": "system,weapon,beam,beam-port"},
+   {"x": 7.0,"y": 3.0,"name": "beam","scale": 1.0,"roles": "system,weapon,beam,beam-starboard"},
+   {"x": 4.0,"y": 7.0,"name": "beam","scale": 1.0,"roles": "system,weapon,beam,beam-port"},
+   {"x": 6.0,"y": 7.0,"name": "beam","scale": 1.0,"roles": "system,weapon,beam,beam-starboard"},
+   
+   {"x": 4.0,"y": 3.0,"name": "torpedo-tube","scale": 1.0,"roles": "system,weapon,torpedo"},
+   {"x": 6.0,"y": 3.0,"name": "torpedo-tube","scale": 1.0,"roles": "system,weapon,torpedo"},
+   {"x": 4.0,"y": 10.0,"name": "torpedo-tube","scale": 1.0,"roles": "system,weapon,torpedo"},
+   {"x": 6.0,"y": 10.0,"name": "torpedo-tube","scale": 1.0,"roles": "system,weapon,torpedo"},
+   
+   {"x": 3.0,"y": 4.0,"name": "impulse","scale": 1.0,"roles": "system,engine,impulse"},
+   {"x": 7.0,"y": 4.0,"name": "impulse","scale": 1.0,"roles": "system,engine,impulse"},
+   {"x": 2.0,"y": 10.0,"name": "impulse","scale": 1.0,"roles": "system,engine,impulse"},
+   {"x": 8.0,"y": 10.0,"name": "impulse","scale": 1.0,"roles": "system,engine,impulse"},
+   
+   {"x": 0.0,"y": 9.0,"name": "warp","scale": 1.0,"roles": "system,engine,warp"},
+   {"x": 2.0,"y": 9.0,"name": "warp","scale": 1.0,"roles": "system,engine,warp"},
+   {"x": 8.0,"y": 9.0,"name": "warp","scale": 1.0,"roles": "system,engine,warp"},
+   {"x": 10.0,"y": 9.0,"name": "warp","scale": 1.0,"roles": "system,engine,warp"},
+   
+   {"x": 5.0,"y": 7.0,"name": "maneuvering","scale": 1.0,"roles": "system,engine,maneuver"},
+   {"x": 2.0,"y": 8.0,"name": "maneuvering","scale": 1.0,"roles": "system,engine,maneuver"},
+   {"x": 8.0,"y": 8.0,"name": "maneuvering","scale": 1.0,"roles": "system,engine,maneuver"},
+   {"x": 5.0,"y": 10.0,"name": "maneuvering","scale": 1.0,"roles": "system,engine,maneuver"},
+   
+   {"x": 5.0,"y": 2.0,"name": "sensors","scale": 1.0,"roles": "system,sensor"},
+   {"x": 5.0,"y": 3.0,"name": "sensors","scale": 1.0,"roles": "system,sensor"},
+   {"x": 5.0,"y": 4.0,"name": "sensors","scale": 1.0,"roles": "system,sensor"},
+   {"x": 5.0,"y": 9.0,"name": "sensors","scale": 1.0,"roles": "system,sensor"},
+   
+   {"x": 4.0,"y": 2.0,"name": "front-shield","scale": 1.2,"roles": "system,shield,fwd"},
+   {"x": 6.0,"y": 2.0,"name": "front-shield","scale": 1.2,"roles": "system,shield,fwd"},
+   {"x": 3.0,"y": 8.0,"name": "front-shield","scale": 1.2,"roles": "system,shield,fwd"},
+   {"x": 7.0,"y": 8.0,"name": "front-shield","scale": 1.2,"roles": "system,shield,fwd"},
+   
+   {"x": 4.0,"y": 4.0,"name": "rear-shield","scale": 1.2,"roles": "system,shield,aft"},
+   {"x": 6.0,"y": 4.0,"name": "rear-shield","scale": 1.2,"roles": "system,shield,aft"},
+   {"x": 1.0,"y": 9.0,"name": "rear-shield","scale": 1.2,"roles": "system,shield,aft"},
+   {"x": 9.0,"y": 9.0,"name": "rear-shield","scale": 1.2,"roles": "system,shield,aft"},
+   
+   {"x": 5.0,"y": 5.0,"name": "cargo","scale": 1.0,"roles": "room,bay,cargo"},
+   {"x": 5.0,"y": 6.0,"name": "cargo","scale": 1.0,"roles": "room,bay,cargo"},
+   {"x": 5.0,"y": 8.0,"name": "cargo","scale": 1.0,"roles": "room,bay,cargo"},
+
+   {"x": 3.0,"y": 9.0,"name": "shuttle","scale": 1.0,"roles": "room,bay,shuttle"},
+   {"x": 7.0,"y": 9.0,"name": "bomber-bay","scale": 1.0,"roles": "room,bay,bomber"},
+   
+   {"x": 6.0,"y": 8.0,"name": "crews-mess","scale": 1.0,"roles": "room,cabin,mess"},
+   {"x": 4.0,"y": 8.0,"name": "sick-bay","scale": 1.0,"roles": "room,med,sickbay"},
+   {"x": 6.0,"y": 9.0,"name": "gymnasium","scale": 1.0,"roles": "room,cabin,gym"},
+   {"x": 4.0,"y": 9.0,"name": "crew-quarters","scale": 1.0,"roles": "room,cabin,quarters"}
+  ]},
 "tsn_light_cruiser":
  {"grid_objects": [
    {"x": 2.0,"y": 14.0,"name": "WARP","scale": 1.0,"roles": "system,ENGINE,WARP"},
