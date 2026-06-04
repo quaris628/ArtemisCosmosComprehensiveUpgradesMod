@@ -1,143 +1,71 @@
 
 shared _surrender_return = task_schedule(take_surrendered_home)
 
+//spawn if can_be_asked_to_surrender(SPAWNED_ID)
+    # Check has_surrender_conditions_set_up in case override_surrender_conditions
+    # was already called (which might happen if it gets called from another //spawn
+    # hook). Override conditions should take precedence over the random defaults
+    # that are set up in setup_surrender_conditions.
+    if not has_surrender_conditions_set_up(SPAWNED_ID):
+        setup_surrender_conditions(SPAWNED_ID)
+    ->END
 
-//comms if has_any_role(COMMS_ORIGIN_ID, "__player__,admiral") and is_space_object_id(COMMS_SELECTED_ID) and side_are_enemies(COMMS_ORIGIN_ID, COMMS_SELECTED_ID) and has_any_role(COMMS_SELECTED_ID, 'Station,ship')
+//enable/comms if is_surrendering_comms_allowed(COMMS_ORIGIN_ID, COMMS_SELECTED_ID)
 
-    yield fail if has_role(COMMS_SELECTED_ID, "never_surrender")
-    yield fail if has_role(COMMS_SELECTED_ID, "surrendered")
+//comms if is_surrendering_comms_allowed(COMMS_ORIGIN_ID, COMMS_SELECTED_ID)
+    if has_declared_never_surrender(COMMS_SELECTED_ID):
+        last_response_never = " (Last response: Never)"
+    else:
+        last_response_never = ""
+    + "Surrender now{last_response_never}"  handle_surrender_request
 
-    surrender_count = get_inventory_value(COMMS_SELECTED_ID, "surrender_count", 0)
-    hide_surr = surrender_count >= 4
-    #
-    # Secret code case
-    #
-    sc_timer = get_inventory_value(COMMS_ORIGIN_ID, "sc_timer", 0)
-    show_surr = not hide_surr or (sc_timer > 0)
-
-    yield fail if not show_surr
-
-    ### comms_add_button("Surrender now", handle_comms_raider_surrender)
-    + "Surrender now"  handle_comms_raider_surrender
-
-
-
-
-
-===== handle_comms_raider_surrender ====
+===== handle_surrender_request ====
+    
+    player_ship_object = to_space_object(COMMS_ORIGIN_ID)
+    if player_ship_object is None:
+        yield fail
+    ship_object = to_space_object(COMMS_SELECTED_ID)
+    if ship_object is None:
+        yield fail
+    
+    surrender_attempt_result = attempt_surrender(ship_object, player_ship_object)
+    
+    yield success
     # TODO: Should surrendered ships change sides?
 
-    blob = to_blob(COMMS_SELECTED_ID)
-    ->END if blob is None
-    player = to_object(COMMS_ORIGIN_ID)
-    ->END if player is None
-    name = player.name
-    surrender_count = get_inventory_value(COMMS_SELECTED_ID, "surrender_count", 0)
+//comms if is_surrendering_comms_allowed(COMMS_ORIGIN_ID, COMMS_SELECTED_ID) and has_code_case(COMMS_ORIGIN_ID)
+    # TODO When do the comms buttons refresh when the ship picks up a code case? Immediately? Or does comms need to switch ships? Or even switch consoles? Do I need to add some sort of forced refresh?
+    + "Secret Code Case"  //comms/secret_codecase
 
-    # Secret Codecase, force surrender if active, otherwise check shield ratio
-    sc_timer = get_inventory_value(COMMS_ORIGIN_ID, "sc_timer", 0)
-    if sc_timer > 0:
-        sc_timer = 0
-        set_inventory_value(COMMS_ORIGIN_ID, "sc_timer", sc_timer )
-        await task_schedule(comms_do_surrender)
-        comms_navigate("//comms")
-        ->END
+//comms/secret_codecase if is_surrendering_comms_allowed(COMMS_ORIGIN_ID, COMMS_SELECTED_ID) and has_code_case(COMMS_ORIGIN_ID)
+    
+    player_ship_object = to_space_object(COMMS_ORIGIN_ID)
+    if player_ship_object is None:
+        yield fail
+    ship_object = to_space_object(COMMS_SELECTED_ID)
+    if ship_object is None:
+        yield fail
+    
+    hypothetical_code_case_attempt_result = test_code_caseable(ship_object, player_ship_object)
+    if hypothetical_code_case_attempt_result != code_case_attempt_result_success():
+        send_comms_response(ship_object.id, player_ship_object, hypothetical_code_case_attempt_result)
+        yield fail
+    
+    + "Back" //comms
+    + "Confirm Transmit Codes"  handle_code_case_transmission
 
-    # get lowest shield value
-    shield_count = blob.get("shield_count", 0)
-    ->END if shield_count is None
-    s_ratio = 100
-    for s in range(shield_count):
-        s_max = blob.get("shield_max_val", s )
-        s_cur = blob.get("shield_val", s )
-        s_ratio = min(s_cur/s_max, s_ratio)
-
-    s_chance = random.randint(1,100)
-    s_crew = to_object(COMMS_SELECTED_ID).crew
-
-    print("Surrender Attempt")
-    print("Shield Ratio: " + str(s_ratio))
-    print("Surrender Chance: " + str(s_chance))
-    print("Surrender Crew: " + str(s_crew))
-    s_mod = 0
-    if s_crew == "arvonian": # Arvonian nobolity prides itself on honor and valor, and detests cowardice
-        s_mod = 5  
-    if s_crew == "skaraan": # Surrendering is bad for business 
-        s_mod = 10
-    if s_crew == "kralien": # Kralien ships tend to be underpowered and outgunned
-        s_mod = -15
-    if s_crew == "torgoth": # Torgoth are xenophobic and less likely to surrender to an "inferior" race
-        s_mod = 15
-    if s_crew == "ximni": # Meaningless death is not considered to be in the spirit of "Xim"
-        s_mod = -10
-    print("Crew Modifier: " + str(s_mod))
-    s_chance = s_chance + s_mod
-    print("Difficulty Modifier: " + str(DIFFICULTY * 2))
-    s_chance = s_chance + (DIFFICULTY * 2)
-    print("Modified Chance: " + str(s_chance))
-
-    if s_ratio >= 0.5:
-          comms_receive(f"""Go climb a tree, {name}!""", title="failed surrender", title_color=raider_color)
-    elif s_ratio < 0.5 and s_ratio >= 0.09:
-        if s_chance <= 40:
-            await task_schedule(comms_do_surrender)
-        else:
-            comms_receive(f"""We can still defeat you, {name}! Prepare to die!""", title="Surrender ignored", title_color=raider_color)
-    elif s_ratio < 0.09:
-        if s_chance <= 75:
-            await task_schedule(comms_do_surrender)
-        else:
-            comms_receive(f"""We will fight to our last breath!""", title="failed surrender", title_color=raider_color)
-            add_role(COMMS_SELECTED_ID, "never_surrender")
-
-    # Chance that a surrender attempt doesn't "count" towards the limit (currently 3 max)
-    # At higher difficulty, chance is lower. 
-    if random.randint(1,100) <= (60 - DIFFICULTY * 4):    
-        set_inventory_value(COMMS_SELECTED_ID, "surrender_count", surrender_count+1)
-    surrender_count = get_inventory_value(COMMS_SELECTED_ID, "surrender_count", 0)
-    print("Surrender Count: " + str(surrender_count))
-
-#    if s_ratio < 0.09:
-#        if s_chance <= 75:
-#            await task_schedule(comms_do_surrender)
-#        else:
-#            comms_receive(f"""We will fight to our last breath!""", title="failed surrender", title_color=raider_color)
-#            add_role(COMMS_SELECTED_ID, "never_surrender")
-#
-#    elif s_ratio < 0.5:
-#        if random.randint(1,100)<=40:
-#            await task_schedule(comms_do_surrender)
-#        else:
-#            comms_receive(f"""We can still defeat you, {name}! Prepare to die!""", title="Surrender ignored", title_color=raider_color)
-#
-#    else:
-#        comms_receive(f"""Go climb a tree, {name}!""", title="failed surrender", title_color=raider_color)
-
-    comms_navigate("//comms")
+===== handle_code_case_transmission ====
+    
+    player_ship_object = to_space_object(COMMS_ORIGIN_ID)
+    if player_ship_object is None:
+        yield fail
+    ship_object = to_space_object(COMMS_SELECTED_ID)
+    if ship_object is None:
+        yield fail
+    
+    code_case_attempt_result = attempt_code_case(ship_object, player_ship_object)
+    
     yield success
-
-
-======== comms_do_surrender ========
-    player = to_object(COMMS_ORIGIN_ID)
-    ->END if player is None
-    name = player.name
-    comms_receive(f"""OK we give up, {name}.""", title_color=surrender_color)
-    add_role(COMMS_SELECTED_ID, "surrendered")
-    GAME_STATISTICS = get_game_statistics()
-    GAME_STATISTICS.record_vessel_surrendered(COMMS_SELECTED)
-    
-    # Emit this prior to removing the raider role, so that listeners can
-    # distinguish raiders surrendering from other vessels surrendering.
-    # (The latter does not exist in the game currently, but might in the future.)
-    signal_emit("npc_surrendered", data={"SURRENDERED_SHIP_ID": COMMS_SELECTED_ID, "REQUESTED_BY_PLAYER_SHIP_ID": COMMS_ORIGIN_ID})
-    
-    remove_role(COMMS_SELECTED_ID, "raider")
-    set_data_set_value(COMMS_SELECTED_ID, "surrender_flag", 1)
-    fleet_remove_ship(COMMS_SELECTED_ID)
-    
-    yield SUCCESS
-
-
 
 #
 # This is a single task to return surrendered 

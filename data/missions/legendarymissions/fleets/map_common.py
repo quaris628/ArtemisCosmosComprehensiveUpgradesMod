@@ -465,6 +465,7 @@ siege_pirate_fleet = [
 
 
 
+# Copied in comms/enemy_surrender.py so that it can be called from there
 def fleet_remove_ship(id_or_obj):
     ship_id = to_id(id_or_obj)
     if ship_id is None:
