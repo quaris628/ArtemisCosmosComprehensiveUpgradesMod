@@ -27,6 +27,9 @@ class ConsoleSlotsContainer:
             return []
         return self._client_console_slot_selections_index[client_id]
     
+    def get_console_slot_identifiers_selected_by_client(self, client_id):
+        return [console_slot.identifier for console_slot in self.get_console_slots_selected_by_client(client_id)]
+    
     def is_at_least_one_console_selected_by_client(self, client_id):
         return client_id in self._client_console_slot_selections_index
     
