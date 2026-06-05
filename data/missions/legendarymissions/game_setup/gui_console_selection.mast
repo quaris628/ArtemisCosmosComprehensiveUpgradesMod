@@ -13,6 +13,12 @@ default TASK_LISTEN_FOR_AFTER_PLAYER_SHIP_DESTROYED = None
         ->END
     if DESTROYING_PLAYER_SHIP_ID != selected_ship.spawned_ship_id:
         ->END
+    if GAME_SETUP_DATA.is_at_least_one_console_selected_by_client(client_id):
+        ship_specific_top_tab_keys = selected_ship.get_console_slot_identifiers_selected_by_client(client_id)
+        ship_specific_top_tab_keys.append("upgrades")
+        selected_ship.deselect_all_consoles(client_id)
+        gui_remove_top_tabs(ship_specific_top_tab_keys)
+        ->END
     GAME_SETUP_DATA = get_game_setup_data()
     if not GAME_SETUP_DATA.is_client_ready(client_id):
         ->END
