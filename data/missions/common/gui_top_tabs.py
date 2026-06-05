@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from sbs_utils.gui import get_client_aspect_ratio
 from sbs_utils.mast.label import label
 from sbs_utils.procedural.execution import AWAIT, END, get_variable, set_variable
-from sbs_utils.procedural.gui import gui_checkbox, gui_message, gui_section
+from sbs_utils.procedural.gui import gui_checkbox, gui_hide, gui_message, gui_section
 from sbs_utils.procedural.signal import signal_emit, signal_register
 from sbs_utils.procedural.timers import delay_app
 
@@ -54,18 +54,49 @@ def _create_single_top_tab(top_tab, length_to_trim_display_name):
     gui_message(checkbox, label=_on_top_tab_clicked)
     _add_to_top_tabs_gui_elements(top_tab.key, checkbox)
 
-@label()
-def _on_top_tab_clicked():
-    TOP_TAB = get_variable("TOP_TAB")
+def gui_remove_top_tabs(tab_keys_to_remove=None, delay_reroute_workaround=False):
+    top_tab_keys_to_checkboxes = _get_top_tab_keys_to_checkboxes_dict()
+    if tab_keys_to_remove is None:
+        # Remove all
+        tab_keys_to_remove = top_tab_keys_to_checkboxes.keys()
+    
+    # Hide everything first...
+    for tab_key in tab_keys_to_remove:
+        checkbox = top_tab_keys_to_checkboxes[tab_key]
+        gui_hide(checkbox)
+    # ...so that when these represents happen,
+    # all gaps left by now-hidden tabs will be filled
+    for tab_key, checkbox in top_tab_keys_to_checkboxes.items():
+        gui_represent_patched(checkbox)
     
     current_selection_key = _get_gui_top_tabs_current_selection_key()
-    if current_selection_key == TOP_TAB.key:
+    if current_selection_key in tab_keys_to_remove:
+        # Switch to a different tab, if one exists
+        if 0 < len(top_tab_keys_to_checkboxes) - len(tab_keys_to_remove):
+            new_top_tab = None
+            for tab_key, checkbox in top_tab_keys_to_checkboxes.items():
+                if tab_key not in tab_keys_to_remove:
+                    new_top_tab = checkbox.data["TOP_TAB"]
+                    break
+            if new_top_tab is not None:
+                gui_switch_to(new_top_tab.gui_main_label, delay_reroute_workaround=delay_reroute_workaround)
+        # if zero tabs exist now, then switch to console selection
+        # (As far as I know, no situation can trigger this code path currently)
+        else:
+            gui_switch_to("gui_console_selection_main", delay_reroute_workaround=delay_reroute_workaround)
+
+@label()
+def _on_top_tab_clicked():
+    top_tab = get_variable("TOP_TAB")
+    
+    current_selection_key = _get_gui_top_tabs_current_selection_key()
+    if current_selection_key == top_tab.key:
         checkbox = _get_top_tab_checkbox(current_selection_key)
         checkbox.value = True
         gui_represent_patched(checkbox)
         yield END()
     
-    gui_switch_to(TOP_TAB.gui_main_label, delay_reroute_workaround=True)
+    gui_switch_to(top_tab.gui_main_label, delay_reroute_workaround=True)
     yield END()
 
 @dataclass(eq=False, frozen=True)
@@ -96,8 +127,8 @@ def signal_gui_top_tab_clicked(client_id):
 
 # top tabs gui elements
 
-def _get_top_tabs_gui_elements():
-    return get_variable(_GUI_TOP_TABS_GUI_ELEMENTS_VAR_NAME).values()
+def _get_top_tab_keys_to_checkboxes_dict():
+    return get_variable(_GUI_TOP_TABS_GUI_ELEMENTS_VAR_NAME)
 
 def _get_top_tab_checkbox(key):
     all_gui_elements = get_variable(_GUI_TOP_TABS_GUI_ELEMENTS_VAR_NAME)
