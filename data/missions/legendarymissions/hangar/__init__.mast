@@ -1,9 +1,12 @@
 import ../../common/library_function_patches.py
+import ../../common/gui_color_scheme.py
 
 import ../game_setup/console_code_helpers.py
 
 import hangar.py
+import gui_home_docks_dropdown.py
+import gui_shield_balance_radio.py
+import gui_ordinance_type_radio.py
 import hangar.mast
 import missions.mast
-import hangar_comms.mast
 # import hangar/bar.mast

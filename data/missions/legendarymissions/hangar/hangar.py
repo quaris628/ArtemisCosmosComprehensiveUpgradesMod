@@ -1,7 +1,7 @@
 from sbs_utils.fs import load_json_data, get_mission_dir_filename
 from random import randint
 from sbs_utils.procedural.spawn import player_spawn
-from sbs_utils.procedural.query import set_science_selection, to_space_object, to_id, object_exists, to_data_set, to_space_object_list
+from sbs_utils.procedural.query import set_science_selection, to_space_object, to_id, object_exists, to_data_set, to_space_object_list, to_blob
 from sbs_utils.procedural.links import link, unlink, get_dedicated_link, set_dedicated_link, linked_to, has_link
 from sbs_utils.procedural.roles import has_role, remove_role, any_role, role, all_roles, has_any_role
 from sbs_utils.procedural.space_objects import broad_test_around, closest, get_pos, set_pos
@@ -11,7 +11,7 @@ from sbs_utils.procedural.media import media_read_relative_file
 from sbs_utils.procedural.ship_data import get_ship_data_for
 
 from sbs_utils.procedural.timers import is_timer_set, set_timer, is_timer_finished
-from sbs_utils.procedural.execution import set_shared_variable, get_shared_variable, get_variable
+from sbs_utils.procedural.execution import set_shared_variable, get_shared_variable, get_variable, task_cancel
 from sbs_utils.agent import Agent
 from sbs_utils.procedural.query import get_science_selection
 from sbs_utils.procedural.inventory import get_inventory_value, set_inventory_value
@@ -21,7 +21,10 @@ import random
 from sbs_utils.procedural.internal_damage import grid_rebuild_grid_objects
 from sbs_utils.procedural.grid import grid_delete_objects
 from sbs_utils.fs import load_yaml_string
+from sbs_utils.procedural.gui.navigation import gui_reroute_client
 import sbs
+
+from data.missions.common.library_function_patches import gui_switch_to
 
 _craft_id = 1
 
@@ -93,12 +96,24 @@ def hangar_set_dock(craft_id, docked_id):
 
     current = get_dedicated_link(craft_id, "home_dock")
     if current is not None: 
+        # TODO this seems wrong; shouldn't it be unlnk(current, ...)?
         unlink(docked_id, "hangar_craft", craft_id)
 
     set_dedicated_link(craft_id, "home_dock", docked_id) # dedicated = can only have one
     link(docked_id, "hangar_craft", craft_id)
     set_science_selection(craft_id, docked_id) # This is effectively a waypoint home for the craft
     hangar_bump_version()
+
+def hangar_clear_dock(craft_id):
+    current = get_dedicated_link(craft_id, "home_dock")
+    if current is not None: 
+        unlink(current, "hangar_craft", craft_id)
+    set_dedicated_link(craft_id, "home_dock", None)
+    set_science_selection(craft_id, None)
+    hangar_bump_version()
+
+def hangar_get_dock(craft_id):
+    return get_dedicated_link(craft_id, "home_dock")
 
 
 _craft_database = None
@@ -332,6 +347,7 @@ def hangar_attempt_dock_craft(craft_id, dock_rng = 600):
     Returns: 
         boolean | None
     """
+    print(f"hangar_attempt_dock_craft craft_id={craft_id} dock_rng={dock_rng}")
     if craft_id is None: return False
     if has_role(craft_id, "standby"): return False
     craft = to_space_object(craft_id)
@@ -354,7 +370,10 @@ def hangar_attempt_dock_craft(craft_id, dock_rng = 600):
         dockable = hangar_filter_valid_dock_ids(craft.id, dockable)
         dock_target = closest(craft_id, dockable)
 
-    if dock_target is None: return False
+    if dock_target is None:
+        print("hangar_attempt_dock_craft returning false b/c dock_target is None")
+        return False
+    print(f"hangar_attempt_dock_craft continuing with dock_target={dock_target}")
     hangar_bump_version()
 
     # Update home dock
@@ -549,4 +568,41 @@ def hangar_console_dock_title_template():
     gui_row("row-height: 1.2em;padding:13px;background:#1578;")
     gui_text(f"$text:Hangar Location;justify: left;")
 
+def hangar_eject(craft_id):
+    """
+    Disconnects the client from the given player single-seat craft.
+    Leaves the craft floating in space, unpiloted.
+    The client is rerouted to the hangar screen, where they can pick another craft.
+    """
+    craft_object = to_space_object(craft_id)
+    if craft_object is not None:
+        craft_object.data_set.set("fighter_thrust_flag", 0,0)
+        craft_object.data_set.set("fighter_shoot_flag", 0,0)
+        craft_object.data_set.set("fighter_boost_flag", 0,0)
+        craft_object.data_set.set("throttle", 0.0,0)
+        # Reset to just the craft name
+        craft_object.name = craft_object.get_inventory_value("craft_name", craft_object.name)
+        
+        craft_client_id = get_inventory_value(craft_id, "client_id")
+        if craft_client_id is not None:
+            hangar_attempt_dock_craft(craft_id, None)
+            listener_task = get_inventory_value(craft_client_id, "hangar_task_listener_for_console_slot_deselect")
+            task_cancel(listener_task)
+            
+            set_dedicated_link(craft_client_id, "craft_id", None)
+            gui_switch_to("show_hangar", client_id=craft_client_id)
 
+def get_available_ordinance_types(craft_object):
+    """
+    Returns a list of the types of ordinance this craft can carry.
+    Includes ordinance types that the craft could carry but currently has zero of.
+    If the craft has zero ordinance types available or is destroyed, returns an empty list.
+    Args:
+        craft_object (space object): a player-piloted single-seat craft
+    Returns:
+        list[str]: list of ordinance types that this craft can carry
+    """
+    # TODO is there a way to get all ordinance types instead of hardcoding them?
+    all_ordinance_types = ["Homing", "Nuke", "EMP", "Mine"]
+    available_ordinance_types = [ordinance_type for ordinance_type in all_ordinance_types if craft_object.data_set.get(f"{ordinance_type}_MAX", 0) > 0]
+    return available_ordinance_types
